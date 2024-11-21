@@ -15,7 +15,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boidsRef = useRef<Boid[]>([]);
   const obstaclesRef = useRef<Obstacle[]>([]);
-  const mousePositionRef = useRef<[number, number]>([width / 2, height / 2]);
+  const mousePositionRef = useRef<[number, number]>([-100, -100]); // 初始化为远离画布的位置
   const animationFrameIdRef = useRef<number>();
 
   const [stats, setStats] = useState({
@@ -165,6 +165,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
         width={width}
         height={height}
         onMouseMove={handleMouseMove}
+        onMouseLeave={() => { mousePositionRef.current = [-100, -100] }} // 鼠标离开时移除鲨鱼
         className="border border-gray-300"
       />
       <StatsDisplay {...stats} />
