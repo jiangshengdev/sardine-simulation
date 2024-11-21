@@ -6,7 +6,7 @@ export class Fish {
   vx: number
   vy: number
   size: number // 添加 size 属性
-  velocity: [number, number] // 添加 velocity 属���
+  velocity: [number, number] // 添加 velocity 属性
 
   constructor(canvasWidth: number, canvasHeight: number) {
     this.x = Math.random() * canvasWidth
@@ -18,38 +18,46 @@ export class Fish {
   }
 
   update(fishes: Fish[], shark: { x: number, y: number }, obstacles: Obstacle[]) {
-    // 规则1: 跟紧前面的鱼
-    const ahead = fishes.find(f => 
-      f !== this && 
-      Math.hypot(f.x - this.x, f.y - this.y) < 30 &&
-      Math.hypot(f.vx - this.vx, f.vy - this.vy) < 0.1
-    )
+    // 合并对fishes的遍历，优化性能
+    let ahead: Fish | undefined;
+    const neighbors: Fish[] = [];
+    let behindCount = 0;
+
+    fishes.forEach(f => {
+      if (f === this) return;
+      const dx = f.x - this.x;
+      const dy = f.y - this.y;
+      const distance = Math.hypot(dx, dy);
+      const velocityDiff = Math.hypot(f.vx - this.vx, f.vy - this.vy);
+
+      if (distance < 30 && velocityDiff < 0.1) {
+        ahead = f;
+      }
+
+      if (distance < 50) {
+        neighbors.push(f);
+      }
+
+      if (distance < 30 && velocityDiff > 0.1) {
+        behindCount++;
+      }
+    });
+
     if (ahead) {
-      this.vx += (ahead.vx - this.vx) * 0.1
-      this.vy += (ahead.vy - this.vy) * 0.1
+      this.vx += (ahead.vx - this.vx) * 0.1;
+      this.vy += (ahead.vy - this.vy) * 0.1;
     }
 
-    // 规则2: 与旁边的鱼保持相等距离
-    const neighbors = fishes.filter(f => 
-      f !== this && 
-      Math.hypot(f.x - this.x, f.y - this.y) < 50
-    )
     if (neighbors.length > 0) {
-      const avgX = neighbors.reduce((sum, f) => sum + f.x, 0) / neighbors.length
-      const avgY = neighbors.reduce((sum, f) => sum + f.y, 0) / neighbors.length
-      this.vx += (avgX - this.x) * 0.05
-      this.vy += (avgY - this.y) * 0.05
+      const avgX = neighbors.reduce((sum, f) => sum + f.x, 0) / neighbors.length;
+      const avgY = neighbors.reduce((sum, f) => sum + f.y, 0) / neighbors.length;
+      this.vx += (avgX - this.x) * 0.05;
+      this.vy += (avgY - this.y) * 0.05;
     }
 
-    // 规则3: 让后面的鱼跟上
-    const behind = fishes.filter(f => 
-      f !== this && 
-      Math.hypot(f.x - this.x, f.y - this.y) < 30 &&
-      Math.hypot(f.vx - this.vx, f.vy - this.vy) > 0.1
-    )
-    if (behind.length > 0) {
-      this.vx *= 0.9
-      this.vy *= 0.9
+    if (behindCount > 0) {
+      this.vx *= 0.9;
+      this.vy *= 0.9;
     }
 
     // 避开鲨鱼
