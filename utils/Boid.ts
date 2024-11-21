@@ -137,7 +137,7 @@ export class Boid {
   }
 
   avoidObstacles(obstacles: Obstacle[]): [number, number] {
-    const perceptionRadius = 50;
+    const perceptionRadius = 20; // 将30减少到20
     let steering: [number, number] = [0, 0];
     for (const obstacle of obstacles) {
       // 修改为使用 [obstacle.x, obstacle.y]

@@ -72,7 +72,7 @@ export class Fish {
       const dx = obstacle.x - this.x // 修改为 this.x
       const dy = obstacle.y - this.y // 修改为 this.y
       const distance = Math.sqrt(dx * dx + dy * dy)
-      if (distance < obstacle.radius + this.size + 50) { // 使用 this.size
+      if (distance < obstacle.radius + this.size + 10) { // 将20减少到10
         this.vx += dx / distance // 修改为 this.vx
         this.vy += dy / distance // 修改为 this.vy
         this.velocity = [this.vx, this.vy] // 更新 velocity
