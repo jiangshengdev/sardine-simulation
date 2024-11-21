@@ -85,7 +85,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
       // Update and draw boids
       boidsRef.current.forEach(boid => {
         boid.flock(boidsRef.current, mousePositionRef.current, obstaclesRef.current);
-        boid.update();
+        boid.update(obstaclesRef.current); // 传入障碍物列表
         boid.edges(width, height);
 
         // Draw boid with dynamic color

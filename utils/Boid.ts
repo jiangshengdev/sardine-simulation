@@ -14,6 +14,7 @@ export class Boid {
   baseColor: string = 'hsl(210, 50%, 50%)';  // 柔和的蓝色
   panicColor: string = 'hsl(0, 50%, 50%)';   // 柔和的红色
   panicLevel: number = 0; // Add panicLevel property
+  size: number; // 添加 size 属性
 
   constructor(x: number, y: number) {
     this.position = [x, y];
@@ -26,6 +27,7 @@ export class Boid {
     this.color = this.baseColor; // Initialize color with baseColor
     this.isScattering = false;
     this.scatterTime = 0;
+    this.size = 5; // 初始化 size
   }
 
   align(boids: Boid[]): [number, number] {
@@ -189,7 +191,7 @@ export class Boid {
     this.panicLevel = Math.max(0, this.panicLevel - 0.01); // Gradually reduce panic level
   }
 
-  update() {
+  update(obstacles: Obstacle[]) {
     this.position[0] += this.velocity[0];
     this.position[1] += this.velocity[1];
     this.velocity[0] += this.acceleration[0];
@@ -208,6 +210,21 @@ export class Boid {
         this.panicLevel = 0; // Reset panic level
       }
     }
+
+    // 检查是否进入障碍物内部
+    obstacles.forEach(obstacle => {
+      const dx = this.position[0] - obstacle.x;
+      const dy = this.position[1] - obstacle.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < obstacle.radius + this.size) {
+        const angle = Math.atan2(dy, dx);
+        this.position[0] = obstacle.x + (obstacle.radius + this.size) * Math.cos(angle);
+        this.position[1] = obstacle.y + (obstacle.radius + this.size) * Math.sin(angle);
+        // 添加推力以帮助鲨鱼脱离障碍物
+        this.velocity[0] += Math.cos(angle) * 0.5;
+        this.velocity[1] += Math.sin(angle) * 0.5;
+      }
+    });
   }
 
   edges(width: number, height: number) {
@@ -246,7 +263,7 @@ export class Boid {
     const magSq = vector[0] ** 2 + vector[1] ** 2;
     if (magSq > max ** 2) {
       const mag = Math.sqrt(magSq);
-      return [vector[0] / mag * max, vector[1] / mag * max];
+      return [vector[0] / mag * max, vector[1] / mag * max]; // 移除第二个元素的额外数组括号
     }
     return vector;
   }

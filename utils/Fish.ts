@@ -83,6 +83,21 @@ export class Fish {
     this.x += this.vx
     this.y += this.vy
 
+    // 检查是否进入障碍物内部
+    obstacles.forEach(obstacle => {
+      const dx = this.x - obstacle.x
+      const dy = this.y - obstacle.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      if (distance < obstacle.radius + this.size) {
+        const angle = Math.atan2(dy, dx)
+        this.x = obstacle.x + (obstacle.radius + this.size) * Math.cos(angle)
+        this.y = obstacle.y + (obstacle.radius + this.size) * Math.sin(angle)
+        // 添加推力以帮助鱼脱离障碍物
+        this.vx += Math.cos(angle) * 0.5
+        this.vy += Math.sin(angle) * 0.5
+      }
+    })
+
     // 限制速度
     const speed = Math.hypot(this.vx, this.vy)
     if (speed > 2) {
