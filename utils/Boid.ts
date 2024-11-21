@@ -33,7 +33,7 @@ export class Boid {
     let steering: [number, number] = [0, 0];
     let total = 0;
     for (const other of boids) {
-      const d = this.distance(other);
+      const d = this.distance(other.position);
       if (other !== this && d < perceptionRadius) {
         steering[0] += other.velocity[0];
         steering[1] += other.velocity[1];
@@ -56,7 +56,7 @@ export class Boid {
     let steering: [number, number] = [0, 0];
     let total = 0;
     for (const other of boids) {
-      const d = this.distance(other);
+      const d = this.distance(other.position);
       if (other !== this && d < perceptionRadius) {
         steering[0] += other.position[0];
         steering[1] += other.position[1];
@@ -81,7 +81,7 @@ export class Boid {
     let steering: [number, number] = [0, 0];
     let total = 0;
     for (const other of boids) {
-      const d = this.distance(other);
+      const d = this.distance(other.position);
       if (other !== this && d < perceptionRadius) {
         let diff: [number, number] = [
           this.position[0] - other.position[0],
@@ -109,7 +109,7 @@ export class Boid {
   avoidShark(sharkPosition: [number, number]): [number, number] {
     const perceptionRadius = 150;
     let steering: [number, number] = [0, 0];
-    const d = this.distanceToPoint(sharkPosition);
+    const d = this.distance(sharkPosition);
     if (d < perceptionRadius) {
       let diff: [number, number] = [
         this.position[0] - sharkPosition[0],
@@ -139,7 +139,7 @@ export class Boid {
     let steering: [number, number] = [0, 0];
     for (const obstacle of obstacles) {
       // 修改为使用 [obstacle.x, obstacle.y]
-      const d = this.distanceToPoint([obstacle.x, obstacle.y]) - obstacle.radius;
+      const d = this.distance([obstacle.x, obstacle.y]) - obstacle.radius;
       if (d < perceptionRadius) {
         let diff: [number, number] = [
           this.position[0] - obstacle.x,
@@ -173,16 +173,19 @@ export class Boid {
     const separationWeight = this.isScattering ? 2 : 1.5;
     const avoidanceWeight = this.isScattering ? 3 : 2;
 
-    this.acceleration[0] += alignment[0] * alignmentWeight + 
-                            cohesion[0] * cohesionWeight + 
-                            separation[0] * separationWeight + 
-                            avoidance[0] * avoidanceWeight + 
-                            obstacleAvoidance[0] * 2;
-    this.acceleration[1] += alignment[1] * alignmentWeight + 
-                            cohesion[1] * cohesionWeight + 
-                            separation[1] * separationWeight + 
-                            avoidance[1] * avoidanceWeight + 
-                            obstacleAvoidance[1] * 2;
+    const accelX = alignment[0] * alignmentWeight + 
+                   cohesion[0] * cohesionWeight + 
+                   separation[0] * separationWeight + 
+                   avoidance[0] * avoidanceWeight + 
+                   obstacleAvoidance[0] * 2;
+    const accelY = alignment[1] * alignmentWeight + 
+                   cohesion[1] * cohesionWeight + 
+                   separation[1] * separationWeight + 
+                   avoidance[1] * avoidanceWeight + 
+                   obstacleAvoidance[1] * 2;
+
+    this.acceleration[0] += accelX;
+    this.acceleration[1] += accelY;
     this.panicLevel = Math.max(0, this.panicLevel - 0.01); // Gradually reduce panic level
   }
 
@@ -220,23 +223,13 @@ export class Boid {
     }
   }
 
-  private distance(other: Boid): number {
-    return Math.sqrt(
-      Math.pow(this.position[0] - other.position[0], 2) +
-      Math.pow(this.position[1] - other.position[1], 2)
-    );
-  }
-
-  // 添加参数验证以防止传递 undefined
-  private distanceToPoint(point: [number, number]): number {
+  // 合并 distance 和 distanceToPoint 函数
+  private distance(point: [number, number]): number {
     if (!point || point.length !== 2) {
-      console.error('Invalid point provided to distanceToPoint:', point);
+      console.error('Invalid point provided to distance:', point);
       return Infinity;
     }
-    return Math.sqrt(
-      Math.pow(this.position[0] - point[0], 2) +
-      Math.pow(this.position[1] - point[1], 2)
-    );
+    return Math.hypot(this.position[0] - point[0], this.position[1] - point[1]);
   }
 
   private setMagnitude(vector: [number, number], mag: number): [number, number] {
@@ -248,22 +241,20 @@ export class Boid {
     return mag !== 0 ? [vector[0] / mag, vector[1] / mag] : [0, 0];
   }
 
+  // 优化 limit 函数
   private limit(vector: [number, number], max: number): [number, number] {
-    const magSq = vector[0] * vector[0] + vector[1] * vector[1];
-    if (magSq > max * max) {
-      vector = this.normalize(vector).map(v => v * max) as [number, number];
+    const magSq = vector[0] ** 2 + vector[1] ** 2;
+    if (magSq > max ** 2) {
+      const mag = Math.sqrt(magSq);
+      return [vector[0] / mag * max, vector[1] / mag * max];
     }
     return vector;
   }
 
+  // 重构 updateColor 方法
   private updateColor() {
-    const baseHue = 210;  // 蓝色的色相
-    const panicHue = 0;   // 红色的色相
-    const saturation = 50;
-    const lightness = 50;
-
-    const hue = baseHue + (panicHue - baseHue) * this.panicLevel;
-    this.color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    const hue = 210 + (0 - 210) * this.panicLevel;
+    this.color = `hsl(${hue}, 50%, 50%)`;
   }
 }
 
