@@ -90,7 +90,6 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
 
         // 示例调用 distanceToPoint
         const target: [number, number] = [mousePositionRef.current[0], mousePositionRef.current[1]]
-        const distance = boid.distanceToPoint(target)
 
         // Draw boid with dynamic color
         ctx.fillStyle = boid.color;

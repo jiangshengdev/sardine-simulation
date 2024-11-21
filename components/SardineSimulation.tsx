@@ -22,11 +22,10 @@ export default function SardineSimulation() {
         const newFishes = Array.from({ length: FISH_COUNT }, () => new Fish(CANVAS_WIDTH, CANVAS_HEIGHT))
 
         // Initialize obstacles
-        const newObstacles = [
+        setObstacles([
           new Obstacle(200, 150, 30),
           new Obstacle(600, 450, 50),
-        ]
-        setObstacles(newObstacles)
+        ])
 
         // Animation loop
         let animationFrameId: number
@@ -35,12 +34,12 @@ export default function SardineSimulation() {
 
           // Update and draw fishes
           newFishes.forEach(fish => {
-            fish.update(newFishes, shark, newObstacles) // 传递障碍物
+            fish.update(newFishes, shark, obstacles) // 传递障碍物
             fish.draw(ctx)
           })
 
           // Draw obstacles
-          newObstacles.forEach(obstacle => {
+          obstacles.forEach(obstacle => {
             obstacle.draw(ctx) // 绘制障碍物
           })
 
