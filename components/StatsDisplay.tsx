@@ -8,40 +8,25 @@ interface StatsDisplayProps {
 }
 
 export function StatsDisplay({ boidCount, averageSpeed, density, panicLevel }: StatsDisplayProps) {
+  const stats = [
+    { label: '沙丁鱼数量', value: boidCount },
+    { label: '平均速度', value: averageSpeed.toFixed(1) },
+    { label: '密度', value: (density * 100).toFixed(2) },
+    { label: '恐慌程度', value: (panicLevel * 100).toFixed(1) + '%' },
+  ]
+
   return (
     <div className="grid grid-cols-4 gap-4">
-      <Card className="min-w-[200px]">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">沙丁鱼数量</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{boidCount}</div>
-        </CardContent>
-      </Card>
-      <Card className="min-w-[200px]">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">平均速度</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{averageSpeed.toFixed(1)}</div>
-        </CardContent>
-      </Card>
-      <Card className="min-w-[200px]">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">密度</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{(density * 100).toFixed(2)}</div>
-        </CardContent>
-      </Card>
-      <Card className="min-w-[200px]">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">恐慌程度</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{(panicLevel * 100).toFixed(1)}%</div>
-        </CardContent>
-      </Card>
+      {stats.map(stat => (
+        <Card className="min-w-[200px]" key={stat.label}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stat.value}</div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }
