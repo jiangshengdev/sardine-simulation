@@ -29,11 +29,11 @@ export class Boid {
   }
 
   align(boids: Boid[]): [number, number] {
-    let perceptionRadius = 50;
+    const perceptionRadius = 50;
     let steering: [number, number] = [0, 0];
     let total = 0;
-    for (let other of boids) {
-      let d = this.distance(other);
+    for (const other of boids) {
+      const d = this.distance(other);
       if (other !== this && d < perceptionRadius) {
         steering[0] += other.velocity[0];
         steering[1] += other.velocity[1];
@@ -52,11 +52,11 @@ export class Boid {
   }
 
   cohere(boids: Boid[]): [number, number] {
-    let perceptionRadius = 100;
+    const perceptionRadius = 100;
     let steering: [number, number] = [0, 0];
     let total = 0;
-    for (let other of boids) {
-      let d = this.distance(other);
+    for (const other of boids) {
+      const d = this.distance(other);
       if (other !== this && d < perceptionRadius) {
         steering[0] += other.position[0];
         steering[1] += other.position[1];
@@ -77,11 +77,11 @@ export class Boid {
   }
 
   separate(boids: Boid[]): [number, number] {
-    let perceptionRadius = 30;
+    const perceptionRadius = 30;
     let steering: [number, number] = [0, 0];
     let total = 0;
-    for (let other of boids) {
-      let d = this.distance(other);
+    for (const other of boids) {
+      const d = this.distance(other);
       if (other !== this && d < perceptionRadius) {
         let diff: [number, number] = [
           this.position[0] - other.position[0],
@@ -107,9 +107,9 @@ export class Boid {
   }
 
   avoidShark(sharkPosition: [number, number]): [number, number] {
-    let perceptionRadius = 150;
+    const perceptionRadius = 150;
     let steering: [number, number] = [0, 0];
-    let d = this.distanceToPoint(sharkPosition);
+    const d = this.distanceToPoint(sharkPosition);
     if (d < perceptionRadius) {
       let diff: [number, number] = [
         this.position[0] - sharkPosition[0],
@@ -135,11 +135,11 @@ export class Boid {
   }
 
   avoidObstacles(obstacles: Obstacle[]): [number, number] {
-    let perceptionRadius = 50;
+    const perceptionRadius = 50;
     let steering: [number, number] = [0, 0];
-    for (let obstacle of obstacles) {
+    for (const obstacle of obstacles) {
       // 修改为使用 [obstacle.x, obstacle.y]
-      let d = this.distanceToPoint([obstacle.x, obstacle.y]) - obstacle.radius;
+      const d = this.distanceToPoint([obstacle.x, obstacle.y]) - obstacle.radius;
       if (d < perceptionRadius) {
         let diff: [number, number] = [
           this.position[0] - obstacle.x,
@@ -162,16 +162,16 @@ export class Boid {
   }
 
   flock(boids: Boid[], sharkPosition: [number, number], obstacles: Obstacle[]) {
-    let alignment = this.align(boids);
-    let cohesion = this.cohere(boids);
-    let separation = this.separate(boids);
-    let avoidance = this.avoidShark(sharkPosition);
-    let obstacleAvoidance = this.avoidObstacles(obstacles);
+    const alignment = this.align(boids);
+    const cohesion = this.cohere(boids);
+    const separation = this.separate(boids);
+    const avoidance = this.avoidShark(sharkPosition);
+    const obstacleAvoidance = this.avoidObstacles(obstacles);
 
-    let alignmentWeight = this.isScattering ? 0.2 : 1;
-    let cohesionWeight = this.isScattering ? 0.2 : 1;
-    let separationWeight = this.isScattering ? 2 : 1.5;
-    let avoidanceWeight = this.isScattering ? 3 : 2;
+    const alignmentWeight = this.isScattering ? 0.2 : 1;
+    const cohesionWeight = this.isScattering ? 0.2 : 1;
+    const separationWeight = this.isScattering ? 2 : 1.5;
+    const avoidanceWeight = this.isScattering ? 3 : 2;
 
     this.acceleration[0] += alignment[0] * alignmentWeight + 
                             cohesion[0] * cohesionWeight + 
@@ -244,12 +244,12 @@ export class Boid {
   }
 
   private normalize(vector: [number, number]): [number, number] {
-    let mag = Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1]);
+    const mag = Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1]);
     return mag !== 0 ? [vector[0] / mag, vector[1] / mag] : [0, 0];
   }
 
   private limit(vector: [number, number], max: number): [number, number] {
-    let magSq = vector[0] * vector[0] + vector[1] * vector[1];
+    const magSq = vector[0] * vector[0] + vector[1] * vector[1];
     if (magSq > max * max) {
       vector = this.normalize(vector).map(v => v * max) as [number, number];
     }
