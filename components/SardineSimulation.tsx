@@ -35,12 +35,12 @@ export default function SardineSimulation() {
 
           // Update and draw fishes
           newFishes.forEach(fish => {
-            fish.update(newFishes, shark, initialObstacles) // 使用initialObstacles
+            fish.update(newFishes, shark, obstacles) // 使用 obstacles
             fish.draw(ctx)
           })
 
           // Draw obstacles
-          initialObstacles.forEach(obstacle => {
+          obstacles.forEach(obstacle => { // 使用 obstacles
             obstacle.draw(ctx)
           })
 
@@ -60,7 +60,7 @@ export default function SardineSimulation() {
         }
       }
     }
-  }, [shark]) // 移除 obstacles 依赖
+  }, [shark, obstacles]) // 添加 obstacles 依赖
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
