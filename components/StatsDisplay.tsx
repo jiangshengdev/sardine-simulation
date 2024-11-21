@@ -3,15 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 interface StatsDisplayProps {
   boidCount: number;
   averageSpeed: number;
-  density: number;
+  averageAcceleration: number; // 替换 density 为 averageAcceleration
   panicLevel: number;
 }
 
-export function StatsDisplay({ boidCount, averageSpeed, density, panicLevel }: StatsDisplayProps) {
+export function StatsDisplay({ boidCount, averageSpeed, averageAcceleration, panicLevel }: StatsDisplayProps) {
   const stats = [
     { label: '沙丁鱼数量', value: boidCount },
     { label: '平均速度', value: averageSpeed.toFixed(1) },
-    { label: '密度', value: (density * 100).toFixed(2) },
+    { label: '平均加速度', value: averageAcceleration.toFixed(2) }, // 确保显示平均加速度
     { label: '恐慌程度', value: (panicLevel * 100).toFixed(1) + '%' },
   ]
 

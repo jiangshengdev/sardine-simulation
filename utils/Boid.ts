@@ -15,6 +15,7 @@ export class Boid {
   panicColor: string = 'hsl(0, 50%, 50%)';   // 柔和的红色
   panicLevel: number = 0; // Add panicLevel property
   size: number; // 添加 size 属性
+  currentAcceleration: [number, number] = [0, 0]; // 添加 currentAcceleration 属性
 
   constructor(x: number, y: number) {
     this.position = [x, y];
@@ -197,6 +198,9 @@ export class Boid {
     this.velocity[0] += this.acceleration[0];
     this.velocity[1] += this.acceleration[1];
     this.velocity = this.limit(this.velocity, this.maxSpeed);
+    // 保存当前加速度
+    this.currentAcceleration = [...this.acceleration];
+    // 重置加速度
     this.acceleration[0] = 0;
     this.acceleration[1] = 0;
 
