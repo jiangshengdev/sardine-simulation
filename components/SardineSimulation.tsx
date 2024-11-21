@@ -59,7 +59,7 @@ export default function SardineSimulation() {
         }
       }
     }
-  }, [shark])
+  }, [shark, obstacles])
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
