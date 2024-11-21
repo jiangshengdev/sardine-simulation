@@ -9,7 +9,6 @@ const FISH_COUNT = 100
 
 export default function SardineSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [fishes, setFishes] = useState<Fish[]>([])
   const [shark, setShark] = useState({ x: -100, y: -100 })
 
   useEffect(() => {
@@ -19,7 +18,6 @@ export default function SardineSimulation() {
       if (ctx) {
         // Initialize fishes
         const newFishes = Array.from({ length: FISH_COUNT }, () => new Fish(CANVAS_WIDTH, CANVAS_HEIGHT))
-        setFishes(newFishes)
 
         // Animation loop
         let animationFrameId: number
@@ -71,4 +69,3 @@ export default function SardineSimulation() {
     />
   )
 }
-
