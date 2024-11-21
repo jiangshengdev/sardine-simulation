@@ -1,3 +1,5 @@
+import {Obstacle} from "@/utils/Obstacle";
+
 export class Fish {
   x: number
   y: number
