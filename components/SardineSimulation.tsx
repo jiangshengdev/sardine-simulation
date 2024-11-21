@@ -18,14 +18,15 @@ export default function SardineSimulation() {
       const canvas = canvasRef.current
       const ctx = canvas.getContext('2d')
       if (ctx) {
-        // Initialize fishes
+        // Initialize fishes only once
         const newFishes = Array.from({ length: FISH_COUNT }, () => new Fish(CANVAS_WIDTH, CANVAS_HEIGHT))
-
-        // Initialize obstacles
-        setObstacles([
+        
+        // Initialize obstacles only once
+        const initialObstacles = [
           new Obstacle(200, 150, 30),
           new Obstacle(600, 450, 50),
-        ])
+        ]
+        setObstacles(initialObstacles)
 
         // Animation loop
         let animationFrameId: number
@@ -34,13 +35,13 @@ export default function SardineSimulation() {
 
           // Update and draw fishes
           newFishes.forEach(fish => {
-            fish.update(newFishes, shark, obstacles) // 传递障碍物
+            fish.update(newFishes, shark, initialObstacles) // 使用initialObstacles
             fish.draw(ctx)
           })
 
           // Draw obstacles
-          obstacles.forEach(obstacle => {
-            obstacle.draw(ctx) // 绘制障碍物
+          initialObstacles.forEach(obstacle => {
+            obstacle.draw(ctx)
           })
 
           // Draw shark
@@ -59,7 +60,7 @@ export default function SardineSimulation() {
         }
       }
     }
-  }, [shark, obstacles])
+  }, [shark]) // 移除 obstacles 依赖
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
