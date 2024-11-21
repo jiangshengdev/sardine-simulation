@@ -79,7 +79,7 @@ export default function SardineSimulation() {
       width={CANVAS_WIDTH}
       height={CANVAS_HEIGHT}
       onMouseMove={handleMouseMove}
-      className="border border-gray-300"
+      className="border border-gray-300 cursor-none"
     />
   )
 }

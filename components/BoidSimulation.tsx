@@ -75,7 +75,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
       averageAcceleration, // 设置 averageAcceleration
       panicLevel: averagePanicLevel,
     });
-  }, [width, height]);
+  }, []);
 
   // Animation loop
   const animate = useCallback(() => {
@@ -168,7 +168,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
         height={height}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => { mousePositionRef.current = [-100, -100] }} // 鼠标离开时移除鲨鱼
-        className="border border-gray-300"
+        className="border border-gray-300 cursor-none"
       />
       <StatsDisplay
         boidCount={stats.boidCount}
