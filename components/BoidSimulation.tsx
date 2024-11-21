@@ -88,6 +88,10 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
         boid.update();
         boid.edges(width, height);
 
+        // 示例调用 distanceToPoint
+        const target: [number, number] = [mousePositionRef.current[0], mousePositionRef.current[1]]
+        const distance = boid.distanceToPoint(target)
+
         // Draw boid with dynamic color
         ctx.fillStyle = boid.color;
         ctx.beginPath();
@@ -112,7 +116,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
       obstaclesRef.current.forEach(obstacle => {
         ctx.fillStyle = 'hsl(120, 30%, 50%)';  // 柔和的绿色
         ctx.beginPath();
-        ctx.arc(obstacle.position[0], obstacle.position[1], obstacle.radius, 0, Math.PI * 2);
+        ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2); // 修改这里
         ctx.fill();
       });
 
@@ -123,10 +127,8 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
       ctx.fill();
     }
 
-    calculateStats();
-
     animationFrameIdRef.current = requestAnimationFrame(animate);
-  }, [width, height, calculateStats]);
+  }, [width, height]);
 
   // Set up and clean up animation
   useEffect(() => {
@@ -138,15 +140,25 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
     };
   }, [animate]);
 
-  // Handle mouse move
+  // 移除 calculateStats 的直接调用，并使用 setInterval 定时更新
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      calculateStats();
+    }, 160); // 每160毫秒更新一次
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [calculateStats]);
+
+  // 修改 handleMouseMove 以确保 mousePositionRef.current 始终为 [number, number]
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (canvas) {
       const rect = canvas.getBoundingClientRect();
-      mousePositionRef.current = [
-        event.clientX - rect.left,
-        event.clientY - rect.top
-      ];
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      mousePositionRef.current = [x, y];
     }
   }, []);
 

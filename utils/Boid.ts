@@ -138,11 +138,12 @@ export class Boid {
     let perceptionRadius = 50;
     let steering: [number, number] = [0, 0];
     for (let obstacle of obstacles) {
-      let d = this.distanceToPoint(obstacle.position) - obstacle.radius;
+      // 修改为使用 [obstacle.x, obstacle.y]
+      let d = this.distanceToPoint([obstacle.x, obstacle.y]) - obstacle.radius;
       if (d < perceptionRadius) {
         let diff: [number, number] = [
-          this.position[0] - obstacle.position[0],
-          this.position[1] - obstacle.position[1]
+          this.position[0] - obstacle.x,
+          this.position[1] - obstacle.y
         ];
         diff = this.normalize(diff);
         diff[0] /= d;
@@ -155,7 +156,7 @@ export class Boid {
       steering = this.setMagnitude(steering, this.maxSpeed);
       steering[0] -= this.velocity[0];
       steering[1] -= this.velocity[1];
-      steering = this.limit(steering, this.maxForce * 2); // Stronger avoidance force
+      steering = this.limit(steering, this.maxForce * 2); // 强化避障力
     }
     return steering;
   }
@@ -226,7 +227,12 @@ export class Boid {
     );
   }
 
+  // 添加参数验证以防止传递 undefined
   private distanceToPoint(point: [number, number]): number {
+    if (!point || point.length !== 2) {
+      console.error('Invalid point provided to distanceToPoint:', point);
+      return Infinity;
+    }
     return Math.sqrt(
       Math.pow(this.position[0] - point[0], 2) +
       Math.pow(this.position[1] - point[1], 2)

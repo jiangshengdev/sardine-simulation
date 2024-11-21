@@ -23,7 +23,7 @@ export function StatsDisplay({ boidCount, averageSpeed, density, panicLevel }: S
           <CardTitle className="text-sm font-medium">平均速度</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{averageSpeed.toFixed(2)}</div>
+          <div className="text-2xl font-bold">{averageSpeed.toFixed(1)}</div>
         </CardContent>
       </Card>
       <Card className="min-w-[200px]">
@@ -31,7 +31,7 @@ export function StatsDisplay({ boidCount, averageSpeed, density, panicLevel }: S
           <CardTitle className="text-sm font-medium">密度</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{density.toFixed(4)}</div>
+          <div className="text-2xl font-bold">{(density * 100).toFixed(2)}</div>
         </CardContent>
       </Card>
       <Card className="min-w-[200px]">
@@ -39,7 +39,7 @@ export function StatsDisplay({ boidCount, averageSpeed, density, panicLevel }: S
           <CardTitle className="text-sm font-medium">恐慌程度</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{(panicLevel * 100).toFixed(2)}%</div>
+          <div className="text-2xl font-bold">{(panicLevel * 100).toFixed(1)}%</div>
         </CardContent>
       </Card>
     </div>

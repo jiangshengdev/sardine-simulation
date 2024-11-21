@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Fish } from '../utils/Fish'
+import { Obstacle } from '../utils/Obstacle' // 添加障碍物导入
 
 const CANVAS_WIDTH = 800
 const CANVAS_HEIGHT = 600
@@ -10,6 +11,7 @@ const FISH_COUNT = 100
 export default function SardineSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [shark, setShark] = useState({ x: -100, y: -100 })
+  const [obstacles, setObstacles] = useState<Obstacle[]>([]) // 添加障碍物状态
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -19,6 +21,13 @@ export default function SardineSimulation() {
         // Initialize fishes
         const newFishes = Array.from({ length: FISH_COUNT }, () => new Fish(CANVAS_WIDTH, CANVAS_HEIGHT))
 
+        // Initialize obstacles
+        const newObstacles = [
+          new Obstacle(200, 150, 30),
+          new Obstacle(600, 450, 50),
+        ]
+        setObstacles(newObstacles)
+
         // Animation loop
         let animationFrameId: number
         const render = () => {
@@ -26,8 +35,13 @@ export default function SardineSimulation() {
 
           // Update and draw fishes
           newFishes.forEach(fish => {
-            fish.update(newFishes, shark)
+            fish.update(newFishes, shark, newObstacles) // 传递障碍物
             fish.draw(ctx)
+          })
+
+          // Draw obstacles
+          newObstacles.forEach(obstacle => {
+            obstacle.draw(ctx) // 绘制障碍物
           })
 
           // Draw shark

@@ -3,15 +3,19 @@ export class Fish {
   y: number
   vx: number
   vy: number
-  
+  size: number // 添加 size 属性
+  velocity: [number, number] // 添加 velocity 属���
+
   constructor(canvasWidth: number, canvasHeight: number) {
     this.x = Math.random() * canvasWidth
     this.y = Math.random() * canvasHeight
     this.vx = Math.random() * 2 - 1
     this.vy = Math.random() * 2 - 1
+    this.size = 5 // 初始化 size
+    this.velocity = [this.vx, this.vy] // 初始化 velocity
   }
 
-  update(fishes: Fish[], shark: { x: number, y: number }) {
+  update(fishes: Fish[], shark: { x: number, y: number }, obstacles: Obstacle[]) {
     // 规则1: 跟紧前面的鱼
     const ahead = fishes.find(f => 
       f !== this && 
@@ -52,6 +56,18 @@ export class Fish {
       this.vx -= (shark.x - this.x) / distToShark * 0.5
       this.vy -= (shark.y - this.y) / distToShark * 0.5
     }
+
+    // 调整避障逻辑，使鱼可以接近障碍物
+    obstacles.forEach(obstacle => {
+      const dx = obstacle.x - this.x // 修改为 this.x
+      const dy = obstacle.y - this.y // 修改为 this.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      if (distance < obstacle.radius + this.size + 50) { // 使用 this.size
+        this.vx += dx / distance // 修改为 this.vx
+        this.vy += dy / distance // 修改为 this.vy
+        this.velocity = [this.vx, this.vy] // 更新 velocity
+      }
+    })
 
     // 更新位置
     this.x += this.vx
