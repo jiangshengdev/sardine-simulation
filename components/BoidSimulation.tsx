@@ -27,6 +27,17 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
 
   // Initialize boids and obstacles
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const scale = window.devicePixelRatio || 1;
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(scale, scale);
+      }
+    }
+
     boidsRef.current = Array.from({ length: boidCount }, () => 
       new Boid(Math.random() * width, Math.random() * height)
     );
