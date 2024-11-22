@@ -35,18 +35,30 @@ export class Boid {
    * @param x 初始x坐标
    * @param y 初始y坐标
    */
+  // 构造函数，初始化Boid的属性。
   constructor(x: number, y: number) {
+    // 初始化位置
     this.position = [x, y];
+    // 初始化速度为随机向量
     this.velocity = [Math.random() * 2 - 1, Math.random() * 2 - 1];
+    // 初始化加速度为零
     this.acceleration = [0, 0];
+    // 最大力
     this.maxForce = 0.2;
+    // 正常最大速度
     this.normalMaxSpeed = 2;
+    // 逃离时的最大速度
     this.fleeMaxSpeed = 5;
+    // 当前最大速度设置为正常速度
     this.maxSpeed = this.normalMaxSpeed;
-    this.color = this.baseColor; // Initialize color with baseColor
+    // 初始化颜色为基础颜色
+    this.color = this.baseColor;
+    // 是否处于分散状态
     this.isScattering = false;
+    // 分散时间计数
     this.scatterTime = 0;
-    this.size = 5; // 初始化 size
+    // Boid的大小
+    this.size = 5;
   }
 
   /**
@@ -269,25 +281,36 @@ export class Boid {
    * 更新 Boid 的位置和速度。
    * @param obstacles 障碍物数组
    */
+  // 更新 Boid 的位置和速度。
   update(obstacles: Obstacle[]) {
-    this.position[0] += this.velocity[0]; // 更新位置 X 坐标
-    this.position[1] += this.velocity[1]; // 更新位置 Y 坐标
-    this.velocity[0] += this.acceleration[0]; // 更新速度 X 分量
-    this.velocity[1] += this.acceleration[1]; // 更新速度 Y 分量
-    this.velocity = this.limit(this.velocity, this.maxSpeed); // 限制速度的大小
+    // 更新位置
+    this.position[0] += this.velocity[0];
+    this.position[1] += this.velocity[1];
+    // 更新速度
+    this.velocity[0] += this.acceleration[0];
+    this.velocity[1] += this.acceleration[1];
+    // 限制速度
+    this.velocity = this.limit(this.velocity, this.maxSpeed);
 
-    this.currentAcceleration = [...this.acceleration]; // 保存当前加速度
-    this.acceleration[0] = 0; // 重置加速度 X 分量
-    this.acceleration[1] = 0; // 重置加速度 Y 分量
+    // 保存当前加速度
+    this.currentAcceleration = [...this.acceleration];
+    // 重置加速度
+    this.acceleration[0] = 0;
+    this.acceleration[1] = 0;
 
-    this.updateColor(); // 更新 Boid 的颜色
+    // 更新颜色
+    this.updateColor();
 
     if (this.isScattering) {
-      this.scatterTime--; // 分散时间递减
+      // 分散时间递减
+      this.scatterTime--;
       if (this.scatterTime <= 0) {
-        this.isScattering = false; // 结束分散状态
-        this.maxSpeed = this.normalMaxSpeed; // 恢复正常最大速度
-        this.panicLevel = 0; // 重置恐慌等级
+        // 结束分散状态
+        this.isScattering = false;
+        // 恢复正常最大速度
+        this.maxSpeed = this.normalMaxSpeed;
+        // 重置恐慌等级
+        this.panicLevel = 0;
       }
     }
 
