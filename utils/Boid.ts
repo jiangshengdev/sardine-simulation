@@ -179,7 +179,7 @@ export class Boid {
     let minDistance = Infinity;
 
     for (const obstacle of obstacles) {
-      const d = this.distance(ahead, obstacle);
+      const d = this.distance(ahead, [obstacle.x, obstacle.y]);
       if (d < obstacle.radius + this.size && d < minDistance) {
         minDistance = d;
         closestObstacle = obstacle;
