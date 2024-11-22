@@ -49,6 +49,12 @@ export class Boid {
     this.size = 5; // 初始化 size
   }
 
+  /**
+   * 调整转向向量。
+   * @param steering 转向向量
+   * @param maxForceMultiplier 最大力的倍数
+   * @returns 调整后的转向向量
+   */
   private adjustSteering(
     steering: [number, number],
     maxForceMultiplier: number,
@@ -60,6 +66,16 @@ export class Boid {
     return steering;
   }
 
+  /**
+   * 计算转向向量。
+   * @param boids 周围的Boid数组
+   * @param getValue 获取Boid属性的函数
+   * @param perceptionRadius 感知半径
+   * @param maxForceMultiplier 最大力的倍数
+   * @param multInverseDistance 是否按距离反比缩放
+   * @param subtractPosition 是否减去当前位置
+   * @returns 计算后的转向向量
+   */
   private calculateSteering(
     boids: Boid[],
     getValue: (other: Boid) => [number, number],
@@ -99,10 +115,20 @@ export class Boid {
     return steering;
   }
 
+  /**
+   * 对齐行为。
+   * @param boids 周围的Boid数组
+   * @returns 对齐力向量
+   */
   align(boids: Boid[]): [number, number] {
     return this.calculateSteering(boids, (other) => other.velocity, 50);
   }
 
+  /**
+   * 凝聚行为。
+   * @param boids 周围的Boid数组
+   * @returns 凝聚力向量
+   */
   cohere(boids: Boid[]): [number, number] {
     return this.calculateSteering(
       boids,
@@ -114,6 +140,11 @@ export class Boid {
     );
   }
 
+  /**
+   * 分离行为。
+   * @param boids 周围的Boid数组
+   * @returns 分离力向量
+   */
   separate(boids: Boid[]): [number, number] {
     return this.calculateSteering(
       boids,
@@ -299,7 +330,8 @@ export class Boid {
 
   /**
    * 计算当前Boid与给定点之间的距离。
-   * @param point 目标点坐标
+   * @param point1 第一个点坐标
+   * @param point2 第二个点坐标（默认当前Boid位置）
    * @returns 距离值
    */
   private distance(
