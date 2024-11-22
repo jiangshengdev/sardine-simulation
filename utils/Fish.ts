@@ -1,13 +1,39 @@
 import {Obstacle} from "@/utils/Obstacle";
 
+/**
+ * 表示模拟中的鱼类。
+ */
 export class Fish {
+  /**
+   * 鱼的x坐标。
+   */
   x: number
+  /**
+   * 鱼的y坐标。
+   */
   y: number
+  /**
+   * 鱼在x轴的速度。
+   */
   vx: number
+  /**
+   * 鱼在y轴的速度。
+   */
   vy: number
-  size: number // 添加 size 属性
-  velocity: [number, number] // 添加 velocity 属性
+  /**
+   * 鱼的大小。
+   */
+  size: number
+  /**
+   * 鱼的速度向量。
+   */
+  velocity: [number, number]
 
+  /**
+   * 创建一个新的鱼实例。
+   * @param canvasWidth 画布的宽度
+   * @param canvasHeight 画布的高度
+   */
   constructor(canvasWidth: number, canvasHeight: number) {
     this.x = Math.random() * canvasWidth
     this.y = Math.random() * canvasHeight
@@ -17,6 +43,12 @@ export class Fish {
     this.velocity = [this.vx, this.vy] // 初始化 velocity
   }
 
+  /**
+   * 更新鱼的位置和状态。
+   * @param fishes 所有鱼的数组
+   * @param shark 鲨鱼的位置
+   * @param obstacles 障碍物的数组
+   */
   update(fishes: Fish[], shark: { x: number, y: number }, obstacles: Obstacle[]) {
     // 合并对fishes的遍历，优化性能
     let ahead: Fish | undefined;
@@ -112,6 +144,10 @@ export class Fish {
     if (this.y > 600) this.y = 0
   }
 
+  /**
+   * 绘制鱼到画布上。
+   * @param ctx 画布的渲染上下文
+   */
   draw(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = 'blue'
     ctx.beginPath()
@@ -119,4 +155,3 @@ export class Fish {
     ctx.fill()
   }
 }
-

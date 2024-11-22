@@ -8,6 +8,9 @@ const CANVAS_WIDTH = 800
 const CANVAS_HEIGHT = 600
 const FISH_COUNT = 100
 
+/**
+ * SardineSimulation 组件负责渲染沙丁鱼模拟动画。
+ */
 export default function SardineSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [shark, setShark] = useState({ x: -100, y: -100 })
@@ -20,7 +23,7 @@ export default function SardineSimulation() {
       if (ctx) {
         // Initialize fishes only once
         const newFishes = Array.from({ length: FISH_COUNT }, () => new Fish(CANVAS_WIDTH, CANVAS_HEIGHT))
-        
+
         // Initialize obstacles only once
         const initialObstacles = [
           new Obstacle(200, 150, 30),
@@ -30,6 +33,10 @@ export default function SardineSimulation() {
 
         // Animation loop
         let animationFrameId: number
+
+        /**
+         * render 函数用于更新和绘制画布内容。
+         */
         const render = () => {
           ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
@@ -62,6 +69,9 @@ export default function SardineSimulation() {
     }
   }, [shark, obstacles]) // 添加 obstacles 依赖
 
+  /**
+   * 处理鼠标移动事件，更新鲨鱼的位置。
+   */
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
     if (canvas) {

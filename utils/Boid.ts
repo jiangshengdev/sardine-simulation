@@ -1,8 +1,22 @@
 import { Obstacle } from './Obstacle';
 
+/**
+ * 表示一个Boid实体，具有位置、速度、加速度等属性，并包含群居行为的方法。
+ */
 export class Boid {
+  /**
+   * 当前位置坐标。
+   */
   position: [number, number];
+
+  /**
+   * 当前速度向量。
+   */
   velocity: [number, number];
+
+  /**
+   * 当前加速度向量。
+   */
   acceleration: [number, number];
   maxForce: number;
   maxSpeed: number;
@@ -17,6 +31,11 @@ export class Boid {
   size: number; // 添加 size 属性
   currentAcceleration: [number, number] = [0, 0]; // 添加 currentAcceleration 属性
 
+  /**
+   * 构造函数，初始化Boid的属性。
+   * @param x 初始x坐标
+   * @param y 初始y坐标
+   */
   constructor(x: number, y: number) {
     this.position = [x, y];
     this.velocity = [Math.random() * 2 - 1, Math.random() * 2 - 1];
@@ -31,6 +50,11 @@ export class Boid {
     this.size = 5; // 初始化 size
   }
 
+  /**
+   * 计算对齐行为的力。
+   * @param boids 周围的Boid数组
+   * @returns 对齐力向量
+   */
   align(boids: Boid[]): [number, number] {
     const perceptionRadius = 50;
     let steering: [number, number] = [0, 0];
@@ -54,6 +78,11 @@ export class Boid {
     return steering;
   }
 
+  /**
+   * 计算凝聚行为的力。
+   * @param boids 周围的Boid数组
+   * @returns 凝聚力向量
+   */
   cohere(boids: Boid[]): [number, number] {
     const perceptionRadius = 100;
     let steering: [number, number] = [0, 0];
@@ -79,6 +108,11 @@ export class Boid {
     return steering;
   }
 
+  /**
+   * 计算分离行为的力。
+   * @param boids 周围的Boid数组
+   * @returns 分离力向量
+   */
   separate(boids: Boid[]): [number, number] {
     const perceptionRadius = 30;
     let steering: [number, number] = [0, 0];
@@ -109,6 +143,11 @@ export class Boid {
     return steering;
   }
 
+  /**
+   * 计算避开鲨鱼的力。
+   * @param sharkPosition 鲨鱼的位置坐标
+   * @returns 避开力向量
+   */
   avoidShark(sharkPosition: [number, number]): [number, number] {
     const perceptionRadius = 150;
     let steering: [number, number] = [0, 0];
@@ -127,7 +166,7 @@ export class Boid {
       steering[0] -= this.velocity[0];
       steering[1] -= this.velocity[1];
       steering = this.limit(steering, this.maxForce * 2); // Stronger avoidance force
-      
+
       // Trigger scattering behavior
       this.isScattering = true;
       this.scatterTime = 100; // Scatter for 100 frames
@@ -137,6 +176,11 @@ export class Boid {
     return steering;
   }
 
+  /**
+   * 计算避开障碍物的力。
+   * @param obstacles 障碍物数组
+   * @returns 避障力向量
+   */
   avoidObstacles(obstacles: Obstacle[]): [number, number] {
     const perceptionRadius = 20; // 将30减少到20
     let steering: [number, number] = [0, 0];
@@ -164,6 +208,12 @@ export class Boid {
     return steering;
   }
 
+  /**
+   * 计算并应用所有群居行为的加速度。
+   * @param boids 周围的Boid数组
+   * @param sharkPosition 鲨鱼的位置坐标
+   * @param obstacles 障碍物数组
+   */
   flock(boids: Boid[], sharkPosition: [number, number], obstacles: Obstacle[]) {
     const alignment = this.align(boids);
     const cohesion = this.cohere(boids);
@@ -176,15 +226,15 @@ export class Boid {
     const separationWeight = this.isScattering ? 2 : 1.5;
     const avoidanceWeight = this.isScattering ? 3 : 2;
 
-    const accelX = alignment[0] * alignmentWeight + 
-                   cohesion[0] * cohesionWeight + 
-                   separation[0] * separationWeight + 
-                   avoidance[0] * avoidanceWeight + 
+    const accelX = alignment[0] * alignmentWeight +
+                   cohesion[0] * cohesionWeight +
+                   separation[0] * separationWeight +
+                   avoidance[0] * avoidanceWeight +
                    obstacleAvoidance[0] * 2;
-    const accelY = alignment[1] * alignmentWeight + 
-                   cohesion[1] * cohesionWeight + 
-                   separation[1] * separationWeight + 
-                   avoidance[1] * avoidanceWeight + 
+    const accelY = alignment[1] * alignmentWeight +
+                   cohesion[1] * cohesionWeight +
+                   separation[1] * separationWeight +
+                   avoidance[1] * avoidanceWeight +
                    obstacleAvoidance[1] * 2;
 
     this.acceleration[0] += accelX;
@@ -192,6 +242,10 @@ export class Boid {
     this.panicLevel = Math.max(0, this.panicLevel - 0.01); // Gradually reduce panic level
   }
 
+  /**
+   * 更新Boid的位置和速度。
+   * @param obstacles 障碍物数组
+   */
   update(obstacles: Obstacle[]) {
     this.position[0] += this.velocity[0];
     this.position[1] += this.velocity[1];
@@ -231,6 +285,11 @@ export class Boid {
     });
   }
 
+  /**
+   * 处理Boid到达边界时的位置循环。
+   * @param width 画布宽度
+   * @param height 画布高度
+   */
   edges(width: number, height: number) {
     if (this.position[0] > width) {
       this.position[0] = 0;
@@ -244,7 +303,11 @@ export class Boid {
     }
   }
 
-  // 合并 distance 和 distanceToPoint 函数
+  /**
+   * 计算当前Boid与给定点之间的距离。
+   * @param point 目标点坐标
+   * @returns 距离值
+   */
   private distance(point: [number, number]): number {
     if (!point || point.length !== 2) {
       console.error('Invalid point provided to distance:', point);
@@ -253,16 +316,32 @@ export class Boid {
     return Math.hypot(this.position[0] - point[0], this.position[1] - point[1]);
   }
 
+  /**
+   * 设置向量的大小。
+   * @param vector 原始向量
+   * @param mag 目标大小
+   * @returns 调整后的向量
+   */
   private setMagnitude(vector: [number, number], mag: number): [number, number] {
     return this.normalize(vector).map(v => v * mag) as [number, number];
   }
 
+  /**
+   * 标准化向量。
+   * @param vector 原始向量
+   * @returns 标准化后的向量
+   */
   private normalize(vector: [number, number]): [number, number] {
     const mag = Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1]);
     return mag !== 0 ? [vector[0] / mag, vector[1] / mag] : [0, 0];
   }
 
-  // 优化 limit 函数
+  /**
+   * 限制向量的大小不超过最大值。
+   * @param vector 原始向量
+   * @param max 最大允许的大小
+   * @returns 限制后的向量
+   */
   private limit(vector: [number, number], max: number): [number, number] {
     const magSq = vector[0] ** 2 + vector[1] ** 2;
     if (magSq > max ** 2) {
@@ -272,10 +351,11 @@ export class Boid {
     return vector;
   }
 
-  // 重构 updateColor 方法
+  /**
+   * 更新Boid的颜色根据恐慌等级。
+   */
   private updateColor() {
     const hue = 210 + (0 - 210) * this.panicLevel;
     this.color = `hsl(${hue}, 50%, 50%)`;
   }
 }
-

@@ -1,12 +1,30 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
+/**
+ * 组件属性接口
+ */
 interface StatsDisplayProps {
+  /**
+   * 沙丁鱼的数量
+   */
   boidCount: number;
+  /**
+   * 平均速度
+   */
   averageSpeed: number;
-  averageAcceleration: number; // 替换 density 为 averageAcceleration
+  /**
+   * 平均加速度
+   */
+  averageAcceleration: number;
+  /**
+   * 恐慌程度
+   */
   panicLevel: number;
 }
 
+/**
+ * 显示统计信息的组件
+ */
 export function StatsDisplay({ boidCount, averageSpeed, averageAcceleration, panicLevel }: StatsDisplayProps) {
   const stats = [
     { label: '沙丁鱼数量', value: boidCount },
@@ -30,4 +48,3 @@ export function StatsDisplay({ boidCount, averageSpeed, averageAcceleration, pan
     </div>
   )
 }
-

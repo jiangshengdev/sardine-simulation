@@ -5,12 +5,21 @@ import { Boid } from '../utils/Boid';
 import { Obstacle } from '../utils/Obstacle';
 import { StatsDisplay } from './StatsDisplay';
 
+/**
+ * BoidSimulation 组件的属性定义。
+ */
 interface BoidSimulationProps {
   width: number;
   height: number;
   boidCount: number;
 }
 
+/**
+ * BoidSimulation 组件用于渲染鲨鱼模拟。
+ *
+ * @param {BoidSimulationProps} props - 组件属性，包括宽度、高度和鲨鱼数量。
+ * @returns {JSX.Element} 渲染的 React 元素。
+ */
 const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCount }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boidsRef = useRef<Boid[]>([]);
@@ -25,7 +34,9 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
     panicLevel: 0,
   });
 
-  // Initialize boids and obstacles
+  /**
+   * 初始化鲨鱼和障碍物。
+   */
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -38,10 +49,10 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
       }
     }
 
-    boidsRef.current = Array.from({ length: boidCount }, () => 
+    boidsRef.current = Array.from({ length: boidCount }, () =>
       new Boid(Math.random() * width, Math.random() * height)
     );
-    
+
     // Create some random obstacles
     obstaclesRef.current = [
       new Obstacle(width * 0.25, height * 0.25, 30),
@@ -50,7 +61,9 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
     ];
   }, [width, height, boidCount]);
 
-  // Calculate stats
+  /**
+   * 计算模拟的统计数据。
+   */
   const calculateStats = useCallback(() => {
     const boids = boidsRef.current;
     let totalSpeed = 0;
@@ -77,7 +90,9 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
     });
   }, []);
 
-  // Animation loop
+  /**
+   * 动画循环，用于更新和绘制鲨鱼及障碍物。
+   */
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -133,7 +148,9 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
     animationFrameIdRef.current = requestAnimationFrame(animate);
   }, [width, height]);
 
-  // Set up and clean up animation
+  /**
+   * 设置和清理动画帧。
+   */
   useEffect(() => {
     animate();
     return () => {
@@ -149,7 +166,11 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
     return () => clearInterval(intervalId);
   }, [calculateStats]);
 
-  // 修改 handleMouseMove 以确保 mousePositionRef.current 始终为 [number, number]
+  /**
+   * 处理鼠标移动事件，更新鼠标位置。
+   *
+   * @param {React.MouseEvent<HTMLCanvasElement>} event - 鼠标事件。
+   */
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -181,4 +202,3 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
 };
 
 export default BoidSimulation;
-
