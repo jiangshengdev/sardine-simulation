@@ -18,16 +18,38 @@ export class Boid {
    * 当前加速度向量。
    */
   acceleration: [number, number];
+
+  // 最大施加给 Boid 的力
   maxForce: number;
+
+  // Boid 的最大速度
   maxSpeed: number;
+
+  // 正常情况下的最大速度
   normalMaxSpeed: number;
+
+  // 逃离时的最大速度
   fleeMaxSpeed: number;
+
+  // Boid 的当前颜色
   color: string;
+
+  // Boid 是否正在散射
   isScattering: boolean;
+
+  // 散射行为的剩余时间
   scatterTime: number;
+
+  // Boid 的基础颜色（柔和的蓝色）
   baseColor: string = 'hsl(210, 50%, 50%)'; // 柔和的蓝色
+
+  // Boid 的当前恐慌程度
   panicLevel: number = 0;
+
+  // Boid 的大小
   size: number;
+
+  // Boid 的当前加速度向量
   currentAcceleration: [number, number] = [0, 0];
 
   /**
