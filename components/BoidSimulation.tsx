@@ -94,6 +94,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
    * 动画循环，用于更新和绘制鲨鱼及障碍物。
    */
   const animate = useCallback(() => {
+    // 获取画布和上下文
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
 
@@ -130,15 +131,15 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({ width, height, boidCoun
         ctx.fill();
       });
 
-      // Draw obstacles
+      // 绘制障碍物
       obstaclesRef.current.forEach(obstacle => {
         ctx.fillStyle = 'hsl(120, 30%, 50%)';  // 柔和的绿色
         ctx.beginPath();
-        ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2); // 修改这里
+        ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2); // 绘制圆形障碍物
         ctx.fill();
       });
 
-      // Draw "shark" (mouse pointer)
+      // 绘制“鲨鱼”鼠标指针
       ctx.fillStyle = 'hsl(0, 70%, 60%)';  // 稍微鲜艳一点的红色,以便更容易看到
       ctx.beginPath();
       ctx.arc(mousePositionRef.current[0], mousePositionRef.current[1], 10, 0, Math.PI * 2);

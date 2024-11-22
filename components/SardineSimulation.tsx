@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Fish } from '../utils/Fish'
-import { Obstacle } from '../utils/Obstacle' // 添加障碍物导入
+import { Obstacle } from '../utils/Obstacle'
 
 const CANVAS_WIDTH = 800
 const CANVAS_HEIGHT = 600
@@ -14,24 +14,24 @@ const FISH_COUNT = 100
 export default function SardineSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [shark, setShark] = useState({ x: -100, y: -100 })
-  const [obstacles, setObstacles] = useState<Obstacle[]>([]) // 添加障碍物状态
+  const [obstacles, setObstacles] = useState<Obstacle[]>([])
 
   useEffect(() => {
     if (canvasRef.current) {
       const canvas = canvasRef.current
       const ctx = canvas.getContext('2d')
       if (ctx) {
-        // Initialize fishes only once
+        // 初始化鱼群，只执行一次
         const newFishes = Array.from({ length: FISH_COUNT }, () => new Fish(CANVAS_WIDTH, CANVAS_HEIGHT))
 
-        // Initialize obstacles only once
+        // 初始化障碍物
         const initialObstacles = [
           new Obstacle(200, 150, 30),
           new Obstacle(600, 450, 50),
         ]
         setObstacles(initialObstacles)
 
-        // Animation loop
+        // 动画循环的请求动画帧ID
         let animationFrameId: number
 
         /**
@@ -40,18 +40,18 @@ export default function SardineSimulation() {
         const render = () => {
           ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
-          // Update and draw fishes
+          // 更新并绘制鱼群
           newFishes.forEach(fish => {
-            fish.update(newFishes, shark, obstacles) // 使用 obstacles
+            fish.update(newFishes, shark, obstacles)
             fish.draw(ctx)
           })
 
-          // Draw obstacles
-          obstacles.forEach(obstacle => { // 使用 obstacles
+          // 绘制障碍物
+          obstacles.forEach(obstacle => {
             obstacle.draw(ctx)
           })
 
-          // Draw shark
+          // 绘制鲨鱼
           ctx.fillStyle = 'gray'
           ctx.beginPath()
           ctx.arc(shark.x, shark.y, 20, 0, Math.PI * 2)
@@ -61,13 +61,13 @@ export default function SardineSimulation() {
         }
         render()
 
-        // Cleanup
+        // 清理动画帧
         return () => {
           cancelAnimationFrame(animationFrameId)
         }
       }
     }
-  }, [shark, obstacles]) // 添加 obstacles 依赖
+  }, [shark, obstacles])
 
   /**
    * 处理鼠标移动事件，更新鲨鱼的位置。
