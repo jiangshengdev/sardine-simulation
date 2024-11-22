@@ -71,9 +71,12 @@ export class Boid {
     steering: [number, number],
     maxForceMultiplier: number,
   ): [number, number] {
+    // 设置转向向量的大小为最大速度
     steering = this.setMagnitude(steering, this.maxSpeed);
+    // 从转向向量中减去当前速度
     steering[0] -= this.velocity[0];
     steering[1] -= this.velocity[1];
+    // 限制转向向量的大小
     steering = this.limit(steering, this.maxForce * maxForceMultiplier);
     return steering;
   }
@@ -96,6 +99,7 @@ export class Boid {
     multInverseDistance: boolean = false,
     subtractPosition: boolean = false,
   ): [number, number] {
+    // 初始化转向向量和总数
     let steering: [number, number] = [0, 0];
     let total = 0;
 
@@ -104,9 +108,11 @@ export class Boid {
       if (other !== this && d < perceptionRadius) {
         const value = getValue(other);
         if (multInverseDistance && d !== 0) {
+          // 按距离反比缩放
           value[0] /= d;
           value[1] /= d;
         }
+        // 累加转向向量
         steering[0] += value[0];
         steering[1] += value[1];
         total++;
@@ -114,14 +120,17 @@ export class Boid {
     }
 
     if (total > 0) {
+      // 计算平均转向向量
       steering[0] /= total;
       steering[1] /= total;
 
       if (subtractPosition) {
+        // 减去当前位置信息
         steering[0] -= this.position[0];
         steering[1] -= this.position[1];
       }
 
+      // 调整转向向量
       steering = this.adjustSteering(steering, maxForceMultiplier);
     }
     return steering;
@@ -133,6 +142,7 @@ export class Boid {
    * @returns 对齐力向量
    */
   align(boids: Boid[]): [number, number] {
+    // 调用计算转向的方法获取对齐力
     return this.calculateSteering(boids, (other) => other.velocity, 50);
   }
 
@@ -142,6 +152,7 @@ export class Boid {
    * @returns 凝聚力向量
    */
   cohere(boids: Boid[]): [number, number] {
+    // 调用计算转向的方法获取凝聚力
     return this.calculateSteering(
       boids,
       (other) => other.position,
@@ -158,6 +169,7 @@ export class Boid {
    * @returns 分离力向量
    */
   separate(boids: Boid[]): [number, number] {
+    // 调用计算转向的方法获取分离力
     return this.calculateSteering(
       boids,
       (other) => [
@@ -170,49 +182,79 @@ export class Boid {
     );
   }
 
+  /**
+   * 避免指定位置的障碍物。
+   * @param positions 障碍物的位置数组
+   * @param perceptionRadius 感知半径
+   * @param maxForceMultiplier 最大力的倍数
+   * @returns 避免力向量
+   */
   private avoid(
     positions: [number, number][],
     perceptionRadius: number,
     maxForceMultiplier: number = 2,
   ): [number, number] {
+    // 初始化转向向量
     let steering: [number, number] = [0, 0];
 
     for (const position of positions) {
       const d = this.distance(position);
       if (d < perceptionRadius) {
+        // 计算与障碍物的差向量
         let diff: [number, number] = [
           this.position[0] - position[0],
           this.position[1] - position[1],
         ];
+        // 标准化差向量
         diff = this.normalize(diff);
+        // 按距离反比缩放
         diff[0] /= d;
         diff[1] /= d;
+        // 累加转向向量
         steering[0] += diff[0];
         steering[1] += diff[1];
       }
     }
 
     if (steering[0] !== 0 || steering[1] !== 0) {
+      // 调整转向向量
       steering = this.adjustSteering(steering, maxForceMultiplier);
     }
     return steering;
   }
 
+  /**
+   * 避免鲨鱼的行为。
+   * @param sharkPosition 鲨鱼的位置坐标
+   * @returns 避免力向量
+   */
   avoidShark(sharkPosition: [number, number]): [number, number] {
+    // 调用避免方法获取避鲨力
     const steering = this.avoid([sharkPosition], 150);
 
     if (steering[0] !== 0 || steering[1] !== 0) {
+      // 设置分散状态
       this.isScattering = true;
+      // 设置分散时间
       this.scatterTime = 100;
+      // 设置逃离时的最大速度
       this.maxSpeed = this.fleeMaxSpeed;
+      // 设置恐慌等级
       this.panicLevel = 1;
     }
     return steering;
   }
 
+  /**
+   * 避免障碍物。
+   * @param obstacles 障碍物数组
+   * @returns 避障力向量
+   */
   private avoidObstacles(obstacles: Obstacle[]): [number, number] {
     const lookAheadDistance = 50; // 前视距离
+    // 标准化当前速度以得到方向向量
     const direction = this.normalize(this.velocity);
+    // 计算前视点的位置
     const ahead: [number, number] = [
       this.position[0] + direction[0] * lookAheadDistance,
       this.position[1] + direction[1] * lookAheadDistance,
@@ -222,6 +264,7 @@ export class Boid {
     let minDistance = Infinity;
 
     for (const obstacle of obstacles) {
+      // 计算前视点与障碍物的距离
       const d = this.distance(ahead, [obstacle.x, obstacle.y]);
       if (d < obstacle.radius + this.size && d < minDistance) {
         minDistance = d;
@@ -230,10 +273,12 @@ export class Boid {
     }
 
     if (closestObstacle) {
+      // 计算避让向量
       const avoidance: [number, number] = [
         ahead[0] - closestObstacle.x,
         ahead[1] - closestObstacle.y,
       ];
+      // 设置避让向量的大小
       return this.setMagnitude(this.normalize(avoidance), this.maxForce * 2);
     }
 
@@ -247,12 +292,14 @@ export class Boid {
    * @param obstacles 障碍物数组
    */
   flock(boids: Boid[], sharkPosition: [number, number], obstacles: Obstacle[]) {
+    // 获取各类力
     const alignment = this.align(boids); // 对齐力
     const cohesion = this.cohere(boids); // 凝聚力
     const separation = this.separate(boids); // 分离力
     const avoidance = this.avoidShark(sharkPosition); // 避开鲨鱼的力
     const obstacleAvoidance = this.avoidObstacles(obstacles); // 避障力
 
+    // 根据是否处于分散状态调整各力的权重
     const alignmentWeight = this.isScattering ? 0.2 : 1; // 对齐力权重
     const cohesionWeight = this.isScattering ? 0.2 : 1; // 凝聚力权重
     const separationWeight = this.isScattering ? 2 : 1.5; // 分离力权重
@@ -272,9 +319,11 @@ export class Boid {
       avoidance[1] * avoidanceWeight +
       obstacleAvoidance[1] * 2;
 
+    // 更新加速度分量
     this.acceleration[0] += accelX; // 更新加速度 X 分量
     this.acceleration[1] += accelY; // 更新加速度 Y 分量
-    this.panicLevel = Math.max(0, this.panicLevel - 0.01); // 逐渐降低恐慌等级
+    // 逐渐降低恐慌等级
+    this.panicLevel = Math.max(0, this.panicLevel - 0.01);
   }
 
   /**
@@ -339,11 +388,13 @@ export class Boid {
    * @param height 画布高度
    */
   edges(width: number, height: number) {
+    // 检查并处理水平边界
     if (this.position[0] > width) {
       this.position[0] = 0;
     } else if (this.position[0] < 0) {
       this.position[0] = width;
     }
+    // 检查并处理垂直边界
     if (this.position[1] > height) {
       this.position[1] = 0;
     } else if (this.position[1] < 0) {
@@ -410,7 +461,9 @@ export class Boid {
    * 更新 Boid 的颜色，根据恐慌等级调整颜色的色调。
    */
   private updateColor() {
-    const hue = 210 + (0 - 210) * this.panicLevel; // 计算颜色的色调
-    this.color = `hsl(${hue}, 50%, 50%)`; // 设置 Boid 的颜色
+    // 计算颜色的色调
+    const hue = 210 + (0 - 210) * this.panicLevel;
+    // 设置 Boid 的颜色
+    this.color = `hsl(${hue}, 50%, 50%)`;
   }
 }
