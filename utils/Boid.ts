@@ -167,11 +167,34 @@ export class Boid {
     return steering;
   }
 
-  avoidObstacles(obstacles: Obstacle[]): [number, number] {
-    const positions: [number, number][] = obstacles.map(
-      (obstacle) => [obstacle.x, obstacle.y] as [number, number],
-    );
-    return this.avoid(positions, 20);
+  private avoidObstacles(obstacles: Obstacle[]): [number, number] {
+    const lookAheadDistance = 50; // 前视距离
+    const direction = this.normalize(this.velocity);
+    const ahead: [number, number] = [
+      this.position[0] + direction[0] * lookAheadDistance,
+      this.position[1] + direction[1] * lookAheadDistance,
+    ];
+
+    let closestObstacle: Obstacle | null = null;
+    let minDistance = Infinity;
+
+    for (const obstacle of obstacles) {
+      const d = this.distance(ahead, obstacle);
+      if (d < obstacle.radius + this.size && d < minDistance) {
+        minDistance = d;
+        closestObstacle = obstacle;
+      }
+    }
+
+    if (closestObstacle) {
+      const avoidance: [number, number] = [
+        ahead[0] - closestObstacle.x,
+        ahead[1] - closestObstacle.y,
+      ];
+      return this.setMagnitude(this.normalize(avoidance), this.maxForce * 2);
+    }
+
+    return [0, 0];
   }
 
   /**
@@ -279,12 +302,15 @@ export class Boid {
    * @param point 目标点坐标
    * @returns 距离值
    */
-  private distance(point: [number, number]): number {
-    if (!point || point.length !== 2) {
-      console.error('Invalid point provided to distance:', point);
+  private distance(
+    point1: [number, number],
+    point2: [number, number] = this.position,
+  ): number {
+    if (!point1 || point1.length !== 2 || !point2 || point2.length !== 2) {
+      console.error('Invalid points provided to distance:', point1, point2);
       return Infinity;
     }
-    return Math.hypot(this.position[0] - point[0], this.position[1] - point[1]);
+    return Math.hypot(point1[0] - point2[0], point1[1] - point2[1]);
   }
 
   /**
