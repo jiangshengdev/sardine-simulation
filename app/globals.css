@@ -80,7 +80,6 @@ body {
 }
 
 canvas {
-  width: 100%;
-  height: auto;
-  max-width: 800px; /* 根据需要调整最大宽度 */
+  width: 800px;
+  height: 600px;
 }
