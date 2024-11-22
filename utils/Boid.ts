@@ -84,81 +84,6 @@ export class Boid {
   }
 
   /**
-   * 调整转向向量。
-   * @param steering 转向向量
-   * @param maxForceMultiplier 最大力的倍数
-   * @returns 调整后的转向向量
-   */
-  private adjustSteering(
-    steering: [number, number],
-    maxForceMultiplier: number,
-  ): [number, number] {
-    // 设置转向向量的大小为最大速度
-    steering = this.setMagnitude(steering, this.maxSpeed);
-    // 从转向向量中减去当前速度
-    steering[0] -= this.velocity[0];
-    steering[1] -= this.velocity[1];
-    // 限制转向向量的大小
-    steering = this.limit(steering, this.maxForce * maxForceMultiplier);
-    return steering;
-  }
-
-  /**
-   * 计算转向向量。
-   * @param boids 周围的Boid数组
-   * @param getValue 获取Boid属性的函数
-   * @param perceptionRadius 感知半径
-   * @param maxForceMultiplier 最大力的倍数
-   * @param multInverseDistance 是否按距离反比缩放
-   * @param subtractPosition 是否减去当前位置
-   * @returns 计算后的转向向量
-   */
-  private calculateSteering(
-    boids: Boid[],
-    getValue: (other: Boid) => [number, number],
-    perceptionRadius: number,
-    maxForceMultiplier: number = 1,
-    multInverseDistance: boolean = false,
-    subtractPosition: boolean = false,
-  ): [number, number] {
-    // 初始化转向向量和总数
-    let steering: [number, number] = [0, 0];
-    let total = 0;
-
-    for (const other of boids) {
-      const d = this.distance(other.position);
-      if (other !== this && d < perceptionRadius) {
-        const value = getValue(other);
-        if (multInverseDistance && d !== 0) {
-          // 按距离反比缩放
-          value[0] /= d;
-          value[1] /= d;
-        }
-        // 累加转向向量
-        steering[0] += value[0];
-        steering[1] += value[1];
-        total++;
-      }
-    }
-
-    if (total > 0) {
-      // 计算平均转向向量
-      steering[0] /= total;
-      steering[1] /= total;
-
-      if (subtractPosition) {
-        // 减去当前位置信息
-        steering[0] -= this.position[0];
-        steering[1] -= this.position[1];
-      }
-
-      // 调整转向向量
-      steering = this.adjustSteering(steering, maxForceMultiplier);
-    }
-    return steering;
-  }
-
-  /**
    * 对齐行为。
    * @param boids 周围的Boid数组
    * @returns 对齐力向量
@@ -205,47 +130,6 @@ export class Boid {
   }
 
   /**
-   * 避免指定位置的障碍物。
-   * @param positions 障碍物的位置数组
-   * @param perceptionRadius 感知半径
-   * @param maxForceMultiplier 最大力的倍数
-   * @returns 避免力向量
-   */
-  private avoid(
-    positions: [number, number][],
-    perceptionRadius: number,
-    maxForceMultiplier: number = 2,
-  ): [number, number] {
-    // 初始化转向向量
-    let steering: [number, number] = [0, 0];
-
-    for (const position of positions) {
-      const d = this.distance(position);
-      if (d < perceptionRadius) {
-        // 计算与障碍物的差向量
-        let diff: [number, number] = [
-          this.position[0] - position[0],
-          this.position[1] - position[1],
-        ];
-        // 标准化差向量
-        diff = this.normalize(diff);
-        // 按距离反比缩放
-        diff[0] /= d;
-        diff[1] /= d;
-        // 累加转向向量
-        steering[0] += diff[0];
-        steering[1] += diff[1];
-      }
-    }
-
-    if (steering[0] !== 0 || steering[1] !== 0) {
-      // 调整转向向量
-      steering = this.adjustSteering(steering, maxForceMultiplier);
-    }
-    return steering;
-  }
-
-  /**
    * 避免鲨鱼的行为。
    * @param sharkPosition 鲨鱼的位置坐标
    * @returns 避免力向量
@@ -265,46 +149,6 @@ export class Boid {
       this.panicLevel = 1;
     }
     return steering;
-  }
-
-  /**
-   * 避免障碍物。
-   * @param obstacles 障碍物数组
-   * @returns 避障力向量
-   */
-  private avoidObstacles(obstacles: Obstacle[]): [number, number] {
-    const lookAheadDistance = 50; // 前视距离
-    // 标准化当前速度以得到方向向量
-    const direction = this.normalize(this.velocity);
-    // 计算前视点的位置
-    const ahead: [number, number] = [
-      this.position[0] + direction[0] * lookAheadDistance,
-      this.position[1] + direction[1] * lookAheadDistance,
-    ];
-
-    let closestObstacle: Obstacle | null = null;
-    let minDistance = Infinity;
-
-    for (const obstacle of obstacles) {
-      // 计算前视点与障碍物的距离
-      const d = this.distance(ahead, [obstacle.x, obstacle.y]);
-      if (d < obstacle.radius + this.size && d < minDistance) {
-        minDistance = d;
-        closestObstacle = obstacle;
-      }
-    }
-
-    if (closestObstacle) {
-      // 计算避让向量
-      const avoidance: [number, number] = [
-        ahead[0] - closestObstacle.x,
-        ahead[1] - closestObstacle.y,
-      ];
-      // 设置避让向量的大小
-      return this.setMagnitude(this.normalize(avoidance), this.maxForce * 2);
-    }
-
-    return [0, 0];
   }
 
   /**
@@ -422,6 +266,162 @@ export class Boid {
     } else if (this.position[1] < 0) {
       this.position[1] = height;
     }
+  }
+
+  /**
+   * 调整转向向量。
+   * @param steering 转向向量
+   * @param maxForceMultiplier 最大力的倍数
+   * @returns 调整后的转向向量
+   */
+  private adjustSteering(
+    steering: [number, number],
+    maxForceMultiplier: number,
+  ): [number, number] {
+    // 设置转向向量的大小为最大速度
+    steering = this.setMagnitude(steering, this.maxSpeed);
+    // 从转向向量中减去当前速度
+    steering[0] -= this.velocity[0];
+    steering[1] -= this.velocity[1];
+    // 限制转向向量的大小
+    steering = this.limit(steering, this.maxForce * maxForceMultiplier);
+    return steering;
+  }
+
+  /**
+   * 计算转向向量。
+   * @param boids 周围的Boid数组
+   * @param getValue 获取Boid属性的函数
+   * @param perceptionRadius 感知半径
+   * @param maxForceMultiplier 最大力的倍数
+   * @param multInverseDistance 是否按距离反比缩放
+   * @param subtractPosition 是否减去当前位置
+   * @returns 计算后的转向向量
+   */
+  private calculateSteering(
+    boids: Boid[],
+    getValue: (other: Boid) => [number, number],
+    perceptionRadius: number,
+    maxForceMultiplier: number = 1,
+    multInverseDistance: boolean = false,
+    subtractPosition: boolean = false,
+  ): [number, number] {
+    // 初始化转向向量和总数
+    let steering: [number, number] = [0, 0];
+    let total = 0;
+
+    for (const other of boids) {
+      const d = this.distance(other.position);
+      if (other !== this && d < perceptionRadius) {
+        const value = getValue(other);
+        if (multInverseDistance && d !== 0) {
+          // 按距离反比缩放
+          value[0] /= d;
+          value[1] /= d;
+        }
+        // 累加转向向量
+        steering[0] += value[0];
+        steering[1] += value[1];
+        total++;
+      }
+    }
+
+    if (total > 0) {
+      // 计算平均转向向量
+      steering[0] /= total;
+      steering[1] /= total;
+
+      if (subtractPosition) {
+        // 减去当前位置信息
+        steering[0] -= this.position[0];
+        steering[1] -= this.position[1];
+      }
+
+      // 调整转向向量
+      steering = this.adjustSteering(steering, maxForceMultiplier);
+    }
+    return steering;
+  }
+
+  /**
+   * 避免指定位置的障碍物。
+   * @param positions 障碍物的位置数组
+   * @param perceptionRadius 感知半径
+   * @param maxForceMultiplier 最大力的倍数
+   * @returns 避免力向量
+   */
+  private avoid(
+    positions: [number, number][],
+    perceptionRadius: number,
+    maxForceMultiplier: number = 2,
+  ): [number, number] {
+    // 初始化转向向量
+    let steering: [number, number] = [0, 0];
+
+    for (const position of positions) {
+      const d = this.distance(position);
+      if (d < perceptionRadius) {
+        // 计算与障碍物的差向量
+        let diff: [number, number] = [
+          this.position[0] - position[0],
+          this.position[1] - position[1],
+        ];
+        // 标准化差向量
+        diff = this.normalize(diff);
+        // 按距离反比缩放
+        diff[0] /= d;
+        diff[1] /= d;
+        // 累加转向向量
+        steering[0] += diff[0];
+        steering[1] += diff[1];
+      }
+    }
+
+    if (steering[0] !== 0 || steering[1] !== 0) {
+      // 调整转向向量
+      steering = this.adjustSteering(steering, maxForceMultiplier);
+    }
+    return steering;
+  }
+
+  /**
+   * 避免障碍物。
+   * @param obstacles 障碍物数组
+   * @returns 避障力向量
+   */
+  private avoidObstacles(obstacles: Obstacle[]): [number, number] {
+    const lookAheadDistance = 50; // 前视距离
+    // 标准化当前速度以得到方向向量
+    const direction = this.normalize(this.velocity);
+    // 计算前视点的位置
+    const ahead: [number, number] = [
+      this.position[0] + direction[0] * lookAheadDistance,
+      this.position[1] + direction[1] * lookAheadDistance,
+    ];
+
+    let closestObstacle: Obstacle | null = null;
+    let minDistance = Infinity;
+
+    for (const obstacle of obstacles) {
+      // 计算前视点与障碍物的距离
+      const d = this.distance(ahead, [obstacle.x, obstacle.y]);
+      if (d < obstacle.radius + this.size && d < minDistance) {
+        minDistance = d;
+        closestObstacle = obstacle;
+      }
+    }
+
+    if (closestObstacle) {
+      // 计算避让向量
+      const avoidance: [number, number] = [
+        ahead[0] - closestObstacle.x,
+        ahead[1] - closestObstacle.y,
+      ];
+      // 设置避让向量的大小
+      return this.setMagnitude(this.normalize(avoidance), this.maxForce * 2);
+    }
+
+    return [0, 0];
   }
 
   /**
