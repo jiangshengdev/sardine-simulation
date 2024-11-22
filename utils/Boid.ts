@@ -26,7 +26,6 @@ export class Boid {
   isScattering: boolean;
   scatterTime: number;
   baseColor: string = 'hsl(210, 50%, 50%)'; // 柔和的蓝色
-  panicColor: string = 'hsl(0, 50%, 50%)'; // 柔和的红色
   panicLevel: number = 0;
   size: number;
   currentAcceleration: [number, number] = [0, 0];
@@ -50,175 +49,129 @@ export class Boid {
     this.size = 5; // 初始化 size
   }
 
-  /**
-   * 计算对齐行为的力，使当前 Boid 的速度与邻居 Boid 的平均速度对齐。
-   * @param boids 周围的 Boid 数组
-   * @returns 对齐力向量
-   */
+  private adjustSteering(
+    steering: [number, number],
+    maxForceMultiplier: number,
+  ): [number, number] {
+    steering = this.setMagnitude(steering, this.maxSpeed);
+    steering[0] -= this.velocity[0];
+    steering[1] -= this.velocity[1];
+    steering = this.limit(steering, this.maxForce * maxForceMultiplier);
+    return steering;
+  }
+
+  private calculateSteering(
+    boids: Boid[],
+    getValue: (other: Boid) => [number, number],
+    perceptionRadius: number,
+    maxForceMultiplier: number = 1,
+    multInverseDistance: boolean = false,
+    subtractPosition: boolean = false,
+  ): [number, number] {
+    let steering: [number, number] = [0, 0];
+    let total = 0;
+
+    for (const other of boids) {
+      const d = this.distance(other.position);
+      if (other !== this && d < perceptionRadius) {
+        const value = getValue(other);
+        if (multInverseDistance && d !== 0) {
+          value[0] /= d;
+          value[1] /= d;
+        }
+        steering[0] += value[0];
+        steering[1] += value[1];
+        total++;
+      }
+    }
+
+    if (total > 0) {
+      steering[0] /= total;
+      steering[1] /= total;
+
+      if (subtractPosition) {
+        steering[0] -= this.position[0];
+        steering[1] -= this.position[1];
+      }
+
+      steering = this.adjustSteering(steering, maxForceMultiplier);
+    }
+    return steering;
+  }
+
   align(boids: Boid[]): [number, number] {
-    const perceptionRadius = 50; // 感知半径，Boid 只能感知该范围内的其他 Boid
-    let steering: [number, number] = [0, 0]; // 初始化转向力为零向量
-    let total = 0; // 感知范围内的 Boid 数量
-
-    // 遍历所有 Boid，计算感知范围内的 Boid 的平均速度
-    for (const other of boids) {
-      const d = this.distance(other.position); // 计算与其他 Boid 的距离
-      if (other !== this && d < perceptionRadius) {
-        steering[0] += other.velocity[0]; // 累加邻居 Boid 的速度
-        steering[1] += other.velocity[1];
-        total++;
-      }
-    }
-
-    if (total > 0) {
-      steering[0] /= total; // 计算速度平均值
-      steering[1] /= total;
-      steering = this.setMagnitude(steering, this.maxSpeed); // 将平均速度调整为最大速度
-      steering[0] -= this.velocity[0]; // 计算转向力（期望速度 - 当前速度）
-      steering[1] -= this.velocity[1];
-      steering = this.limit(steering, this.maxForce); // 限制转向力的最大值
-    }
-    return steering; // 返回对齐力向量
+    return this.calculateSteering(boids, (other) => other.velocity, 50);
   }
 
-  /**
-   * 计算凝聚行为的力，使当前 Boid 朝向邻居 Boid 的中心移动。
-   * @param boids 周围的 Boid 数组
-   * @returns 凝聚力向量
-   */
   cohere(boids: Boid[]): [number, number] {
-    const perceptionRadius = 100; // 感知半径
-    let steering: [number, number] = [0, 0]; // 初始化转向力为零向量
-    let total = 0; // 感知范围内的 Boid 数量
-
-    // 遍历所有 Boid，计算感知范围内的 Boid 的平均位置
-    for (const other of boids) {
-      const d = this.distance(other.position);
-      if (other !== this && d < perceptionRadius) {
-        steering[0] += other.position[0]; // 累加邻居 Boid 的位置
-        steering[1] += other.position[1];
-        total++;
-      }
-    }
-
-    if (total > 0) {
-      steering[0] /= total; // 计算位置平均值
-      steering[1] /= total;
-      steering[0] -= this.position[0]; // 计算朝向质心的向量
-      steering[1] -= this.position[1];
-      steering = this.setMagnitude(steering, this.maxSpeed); // 将向量调整为最大速度
-      steering[0] -= this.velocity[0]; // 计算转向力
-      steering[1] -= this.velocity[1];
-      steering = this.limit(steering, this.maxForce); // 限制转向力的最大值
-    }
-    return steering; // 返回凝聚力向量
+    return this.calculateSteering(
+      boids,
+      (other) => other.position,
+      100,
+      1,
+      false,
+      true,
+    );
   }
 
-  /**
-   * 计算分离行为的力，使当前 Boid 远离过于靠近的邻居 Boid，避免碰撞。
-   * @param boids 周围的 Boid 数组
-   * @returns 分离力向量
-   */
   separate(boids: Boid[]): [number, number] {
-    const perceptionRadius = 30; // 感知半径
-    let steering: [number, number] = [0, 0]; // 初始化转向力为零向量
-    let total = 0; // 感知范围内的 Boid 数量
-
-    // 遍历所有 Boid，计算远离邻居 Boid 的力
-    for (const other of boids) {
-      const d = this.distance(other.position);
-      if (other !== this && d < perceptionRadius) {
-        let diff: [number, number] = [
-          this.position[0] - other.position[0],
-          this.position[1] - other.position[1],
-        ];
-        diff = this.normalize(diff); // 归一化方向向量
-        diff[0] /= d; // 与距离成反比，距离越近，力越大
-        diff[1] /= d;
-        steering[0] += diff[0]; // 累加分离力
-        steering[1] += diff[1];
-        total++;
-      }
-    }
-
-    if (total > 0) {
-      steering[0] /= total; // 计算平均分离力
-      steering[1] /= total;
-      steering = this.setMagnitude(steering, this.maxSpeed); // 将向量调整为最大速度
-      steering[0] -= this.velocity[0]; // 计算转向力
-      steering[1] -= this.velocity[1];
-      steering = this.limit(steering, this.maxForce); // 限制转向力的最大值
-    }
-    return steering; // 返回分离力向量
+    return this.calculateSteering(
+      boids,
+      (other) => [
+        this.position[0] - other.position[0],
+        this.position[1] - other.position[1],
+      ],
+      30,
+      1,
+      true,
+    );
   }
 
-  /**
-   * 计算避开鲨鱼的力，当鲨鱼接近时使 Boid 远离鲨鱼。
-   * @param sharkPosition 鲨鱼的位置坐标
-   * @returns 避开力向量
-   */
-  avoidShark(sharkPosition: [number, number]): [number, number] {
-    const perceptionRadius = 150; // 感知鲨鱼的范围
-    let steering: [number, number] = [0, 0];
-    const d = this.distance(sharkPosition);
-
-    if (d < perceptionRadius) {
-      // 计算远离鲨鱼的方向向量
-      let diff: [number, number] = [
-        this.position[0] - sharkPosition[0],
-        this.position[1] - sharkPosition[1],
-      ];
-      diff = this.normalize(diff); // 归一化方向向量
-      diff[0] /= d; // 与距离成反比，距离越近，力越大
-      diff[1] /= d;
-      steering[0] += diff[0]; // 累加避开鲨鱼的力
-      steering[1] += diff[1];
-      steering = this.setMagnitude(steering, this.maxSpeed); // 将向量调整为最大速度
-      steering[0] -= this.velocity[0]; // 计算转向力
-      steering[1] -= this.velocity[1];
-      steering = this.limit(steering, this.maxForce * 2); // 增强避开鲨鱼的力
-
-      // 触发分散行为
-      this.isScattering = true;
-      this.scatterTime = 100; // 分散持续的时间帧数
-      this.maxSpeed = this.fleeMaxSpeed; // 提高最大速度以加速逃离
-      this.panicLevel = 1; // 设置恐慌等级为最高
-    }
-    return steering; // 返回避开力向量
-  }
-
-  /**
-   * 计算避开障碍物的力，防止 Boid 撞上障碍物。
-   * @param obstacles 障碍物数组
-   * @returns 避障力向量
-   */
-  avoidObstacles(obstacles: Obstacle[]): [number, number] {
-    const perceptionRadius = 20; // 感知障碍物的范围
+  private avoid(
+    positions: [number, number][],
+    perceptionRadius: number,
+    maxForceMultiplier: number = 2,
+  ): [number, number] {
     let steering: [number, number] = [0, 0];
 
-    // 遍历所有障碍物，计算避开力
-    for (const obstacle of obstacles) {
-      const d = this.distance([obstacle.x, obstacle.y]) - obstacle.radius;
+    for (const position of positions) {
+      const d = this.distance(position);
       if (d < perceptionRadius) {
         let diff: [number, number] = [
-          this.position[0] - obstacle.x,
-          this.position[1] - obstacle.y,
+          this.position[0] - position[0],
+          this.position[1] - position[1],
         ];
-        diff = this.normalize(diff); // 归一化方向向量
-        diff[0] /= d; // 与距离成反比
+        diff = this.normalize(diff);
+        diff[0] /= d;
         diff[1] /= d;
-        steering[0] += diff[0]; // 累加避障力
+        steering[0] += diff[0];
         steering[1] += diff[1];
       }
     }
 
     if (steering[0] !== 0 || steering[1] !== 0) {
-      steering = this.setMagnitude(steering, this.maxSpeed); // 调整向量至最大速度
-      steering[0] -= this.velocity[0]; // 计算转向力
-      steering[1] -= this.velocity[1];
-      steering = this.limit(steering, this.maxForce * 2); // 增强避障力
+      steering = this.adjustSteering(steering, maxForceMultiplier);
     }
-    return steering; // 返回避障力向量
+    return steering;
+  }
+
+  avoidShark(sharkPosition: [number, number]): [number, number] {
+    const steering = this.avoid([sharkPosition], 150);
+
+    if (steering[0] !== 0 || steering[1] !== 0) {
+      this.isScattering = true;
+      this.scatterTime = 100;
+      this.maxSpeed = this.fleeMaxSpeed;
+      this.panicLevel = 1;
+    }
+    return steering;
+  }
+
+  avoidObstacles(obstacles: Obstacle[]): [number, number] {
+    const positions: [number, number][] = obstacles.map(
+      (obstacle) => [obstacle.x, obstacle.y] as [number, number],
+    );
+    return this.avoid(positions, 20);
   }
 
   /**

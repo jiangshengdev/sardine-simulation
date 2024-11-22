@@ -24,7 +24,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
   width,
   height,
   boidCount,
-}: BoidSimulationProps): JSX.Element => {
+}: BoidSimulationProps): React.ReactElement => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boidsRef = useRef<Boid[]>([]);
   const obstaclesRef = useRef<Obstacle[]>([]);

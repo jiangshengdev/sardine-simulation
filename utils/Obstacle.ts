@@ -17,15 +17,4 @@ export class Obstacle {
     this.y = y;
     this.radius = radius;
   }
-
-  /**
-   * 绘制障碍物到画布
-   * @param ctx - 画布的渲染上下文
-   */
-  draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = 'green'; // 障碍物颜色
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-  }
 }
