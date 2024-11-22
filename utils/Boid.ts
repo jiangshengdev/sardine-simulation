@@ -25,8 +25,8 @@ export class Boid {
   color: string;
   isScattering: boolean;
   scatterTime: number;
-  baseColor: string = 'hsl(210, 50%, 50%)';  // 柔和的蓝色
-  panicColor: string = 'hsl(0, 50%, 50%)';   // 柔和的红色
+  baseColor: string = 'hsl(210, 50%, 50%)'; // 柔和的蓝色
+  panicColor: string = 'hsl(0, 50%, 50%)'; // 柔和的红色
   panicLevel: number = 0;
   size: number;
   currentAcceleration: [number, number] = [0, 0];
@@ -130,7 +130,7 @@ export class Boid {
       if (other !== this && d < perceptionRadius) {
         let diff: [number, number] = [
           this.position[0] - other.position[0],
-          this.position[1] - other.position[1]
+          this.position[1] - other.position[1],
         ];
         diff = this.normalize(diff); // 归一化方向向量
         diff[0] /= d; // 与距离成反比，距离越近，力越大
@@ -166,7 +166,7 @@ export class Boid {
       // 计算远离鲨鱼的方向向量
       let diff: [number, number] = [
         this.position[0] - sharkPosition[0],
-        this.position[1] - sharkPosition[1]
+        this.position[1] - sharkPosition[1],
       ];
       diff = this.normalize(diff); // 归一化方向向量
       diff[0] /= d; // 与距离成反比，距离越近，力越大
@@ -202,7 +202,7 @@ export class Boid {
       if (d < perceptionRadius) {
         let diff: [number, number] = [
           this.position[0] - obstacle.x,
-          this.position[1] - obstacle.y
+          this.position[1] - obstacle.y,
         ];
         diff = this.normalize(diff); // 归一化方向向量
         diff[0] /= d; // 与距离成反比
@@ -240,16 +240,18 @@ export class Boid {
     const avoidanceWeight = this.isScattering ? 3 : 2; // 避开鲨鱼的力权重
 
     // 计算总加速度，增加避障权重以应对复杂环境
-    const accelX = alignment[0] * alignmentWeight +
-                   cohesion[0] * cohesionWeight +
-                   separation[0] * separationWeight +
-                   avoidance[0] * avoidanceWeight +
-                   obstacleAvoidance[0] * 2;
-    const accelY = alignment[1] * alignmentWeight +
-                   cohesion[1] * cohesionWeight +
-                   separation[1] * separationWeight +
-                   avoidance[1] * avoidanceWeight +
-                   obstacleAvoidance[1] * 2;
+    const accelX =
+      alignment[0] * alignmentWeight +
+      cohesion[0] * cohesionWeight +
+      separation[0] * separationWeight +
+      avoidance[0] * avoidanceWeight +
+      obstacleAvoidance[0] * 2;
+    const accelY =
+      alignment[1] * alignmentWeight +
+      cohesion[1] * cohesionWeight +
+      separation[1] * separationWeight +
+      avoidance[1] * avoidanceWeight +
+      obstacleAvoidance[1] * 2;
 
     this.acceleration[0] += accelX; // 更新加速度 X 分量
     this.acceleration[1] += accelY; // 更新加速度 Y 分量
@@ -283,15 +285,17 @@ export class Boid {
     }
 
     // 检查是否进入障碍物内部
-    obstacles.forEach(obstacle => {
+    obstacles.forEach((obstacle) => {
       const dx = this.position[0] - obstacle.x;
       const dy = this.position[1] - obstacle.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       if (distance < obstacle.radius + this.size) {
         const angle = Math.atan2(dy, dx);
         // 将 Boid 的位置调整到障碍物表面
-        this.position[0] = obstacle.x + (obstacle.radius + this.size) * Math.cos(angle);
-        this.position[1] = obstacle.y + (obstacle.radius + this.size) * Math.sin(angle);
+        this.position[0] =
+          obstacle.x + (obstacle.radius + this.size) * Math.cos(angle);
+        this.position[1] =
+          obstacle.y + (obstacle.radius + this.size) * Math.sin(angle);
         // 添加推力以帮助脱离障碍物
         this.velocity[0] += Math.cos(angle) * 0.5;
         this.velocity[1] += Math.sin(angle) * 0.5;
@@ -336,8 +340,11 @@ export class Boid {
    * @param mag 目标大小
    * @returns 调整后的向量
    */
-  private setMagnitude(vector: [number, number], mag: number): [number, number] {
-    return this.normalize(vector).map(v => v * mag) as [number, number];
+  private setMagnitude(
+    vector: [number, number],
+    mag: number,
+  ): [number, number] {
+    return this.normalize(vector).map((v) => v * mag) as [number, number];
   }
 
   /**
@@ -360,7 +367,7 @@ export class Boid {
     const magSq = vector[0] ** 2 + vector[1] ** 2;
     if (magSq > max ** 2) {
       const mag = Math.sqrt(magSq);
-      return [vector[0] / mag * max, vector[1] / mag * max];
+      return [(vector[0] / mag) * max, (vector[1] / mag) * max];
     }
     return vector;
   }

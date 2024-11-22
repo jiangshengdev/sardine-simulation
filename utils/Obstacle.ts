@@ -2,9 +2,9 @@
  * 障碍物类
  */
 export class Obstacle {
-  x: number
-  y: number
-  radius: number
+  x: number;
+  y: number;
+  radius: number;
 
   /**
    * 创建一个新的障碍物实例
@@ -13,9 +13,9 @@ export class Obstacle {
    * @param radius - 障碍物的半径
    */
   constructor(x: number, y: number, radius: number) {
-    this.x = x
-    this.y = y
-    this.radius = radius
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
   }
 
   /**
@@ -23,9 +23,9 @@ export class Obstacle {
    * @param ctx - 画布的渲染上下文
    */
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = 'green' // 障碍物颜色
-    ctx.beginPath()
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
-    ctx.fill()
+    ctx.fillStyle = 'green'; // 障碍物颜色
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
   }
 }
