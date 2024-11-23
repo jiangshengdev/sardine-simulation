@@ -10,7 +10,7 @@ export class Obstacle {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = 'green'; // 障碍物颜色
+    ctx.fillStyle = 'green';
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fill();

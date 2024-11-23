@@ -19,17 +19,16 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boidsRef = useRef<Boid[]>([]);
   const obstaclesRef = useRef<Obstacle[]>([]);
-  const mousePositionRef = useRef<[number, number]>([-300, -300]); // Initialize farther away to reduce impact on fish
+  const mousePositionRef = useRef<[number, number]>([-300, -300]);
   const animationFrameIdRef = useRef<number>();
 
   const [stats, setStats] = useState({
     boidCount: boidCount,
     averageSpeed: 0,
-    averageAcceleration: 0, // 添加 averageAcceleration
+    averageAcceleration: 0,
     panicLevel: 0,
   });
 
-  // Initialize boids and obstacles
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -47,7 +46,6 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
       () => new Boid(Math.random() * width, Math.random() * height),
     );
 
-    // Create some random obstacles
     obstaclesRef.current = [
       new Obstacle(width * 0.25, height * 0.25, 30),
       new Obstacle(width * 0.75, height * 0.75, 40),
@@ -55,12 +53,11 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
     ];
   }, [width, height, boidCount]);
 
-  // Calculate stats
   const calculateStats = useCallback(() => {
     const boids = boidsRef.current;
     let totalSpeed = 0;
     let totalPanicLevel = 0;
-    let totalAcceleration = 0; // 添加 totalAcceleration
+    let totalAcceleration = 0;
 
     boids.forEach((boid) => {
       const speed = Math.sqrt(boid.velocity[0] ** 2 + boid.velocity[1] ** 2);
@@ -68,23 +65,22 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
       totalPanicLevel += boid.panicLevel;
       const acceleration = Math.sqrt(
         boid.currentAcceleration[0] ** 2 + boid.currentAcceleration[1] ** 2,
-      ); // 使用 currentAcceleration
+      );
       totalAcceleration += acceleration;
     });
 
     const averageSpeed = totalSpeed / boids.length;
-    const averageAcceleration = totalAcceleration / boids.length; // 计算平均加速度
+    const averageAcceleration = totalAcceleration / boids.length;
     const averagePanicLevel = totalPanicLevel / boids.length;
 
     setStats({
       boidCount: boids.length,
       averageSpeed,
-      averageAcceleration, // 设置 averageAcceleration
+      averageAcceleration,
       panicLevel: averagePanicLevel,
     });
   }, []);
 
-  // Animation loop
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -92,7 +88,6 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
     if (ctx) {
       ctx.clearRect(0, 0, width, height);
 
-      // 更新 boids 的行为
       boidsRef.current.forEach((boid) => {
         boid.flock(
           boidsRef.current,
@@ -101,12 +96,10 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
         );
       });
 
-      // 更新并绘制 boids
       boidsRef.current.forEach((boid) => {
-        boid.update(obstaclesRef.current); // 传入障碍物列表
+        boid.update(obstaclesRef.current);
         boid.edges(width, height);
 
-        // 绘制 boid
         ctx.fillStyle = boid.color;
         ctx.beginPath();
         const angle = Math.atan2(boid.velocity[1], boid.velocity[0]);
@@ -126,16 +119,14 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
         ctx.fill();
       });
 
-      // Draw obstacles
       obstaclesRef.current.forEach((obstacle) => {
-        ctx.fillStyle = 'hsl(120, 30%, 50%)'; // 柔和的绿色
+        ctx.fillStyle = 'hsl(120, 30%, 50%)';
         ctx.beginPath();
-        ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2); // 修改这里
+        ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // Draw "shark" (mouse pointer)
-      ctx.fillStyle = 'hsl(0, 70%, 60%)'; // 稍微鲜艳一点的红色,以便更容易看到
+      ctx.fillStyle = 'hsl(0, 70%, 60%)';
       ctx.beginPath();
       ctx.arc(
         mousePositionRef.current[0],
@@ -150,7 +141,6 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
     animationFrameIdRef.current = requestAnimationFrame(animate);
   }, [width, height]);
 
-  // Set up and clean up animation
   useEffect(() => {
     animate();
     return () => {
@@ -160,13 +150,11 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
     };
   }, [animate]);
 
-  // 添加新的 useEffect 来每160毫秒更新一次统计数据
   useEffect(() => {
     const intervalId = setInterval(calculateStats, 160);
     return () => clearInterval(intervalId);
   }, [calculateStats]);
 
-  // 修改 handleMouseMove 以确保 mousePositionRef.current 始终为 [number, number]
   const handleMouseMove = useCallback(
     (event: React.MouseEvent<HTMLCanvasElement>) => {
       const canvas = canvasRef.current;
@@ -189,13 +177,13 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
         onMouseMove={handleMouseMove}
         onMouseLeave={() => {
           mousePositionRef.current = [-300, -300];
-        }} // 鼠标离开时移除鲨鱼
+        }}
         className="border border-gray-300 cursor-none"
       />
       <StatsDisplay
         boidCount={stats.boidCount}
         averageSpeed={stats.averageSpeed}
-        averageAcceleration={stats.averageAcceleration} // 传递 averageAcceleration
+        averageAcceleration={stats.averageAcceleration}
         panicLevel={stats.panicLevel}
       />
     </div>

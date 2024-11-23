@@ -11,11 +11,11 @@ export class Boid {
   color: string;
   isScattering: boolean;
   scatterTime: number;
-  baseColor: string = 'hsl(210, 50%, 50%)'; // 柔和的蓝色
-  panicColor: string = 'hsl(0, 50%, 50%)'; // 柔和的红色
-  panicLevel: number = 0; // Add panicLevel property
-  size: number; // 添加 size 属性
-  currentAcceleration: [number, number] = [0, 0]; // 添加 currentAcceleration 属性
+  baseColor: string = 'hsl(210, 50%, 50%)';
+  panicColor: string = 'hsl(0, 50%, 50%)';
+  panicLevel: number = 0;
+  size: number;
+  currentAcceleration: [number, number] = [0, 0];
 
   constructor(x: number, y: number) {
     this.position = [x, y];
@@ -25,10 +25,10 @@ export class Boid {
     this.normalMaxSpeed = 2;
     this.fleeMaxSpeed = 5;
     this.maxSpeed = this.normalMaxSpeed;
-    this.color = this.baseColor; // Initialize color with baseColor
+    this.color = this.baseColor;
     this.isScattering = false;
     this.scatterTime = 0;
-    this.size = 5; // 初始化 size
+    this.size = 5;
   }
 
   align(boids: Boid[]): [number, number] {
@@ -126,22 +126,20 @@ export class Boid {
       steering = this.setMagnitude(steering, this.maxSpeed);
       steering[0] -= this.velocity[0];
       steering[1] -= this.velocity[1];
-      steering = this.limit(steering, this.maxForce * 2); // Stronger avoidance force
+      steering = this.limit(steering, this.maxForce * 2);
 
-      // Trigger scattering behavior
       this.isScattering = true;
-      this.scatterTime = 100; // Scatter for 100 frames
+      this.scatterTime = 100;
       this.maxSpeed = this.fleeMaxSpeed;
-      this.panicLevel = 1; // Set panic level to maximum when avoiding shark
+      this.panicLevel = 1;
     }
     return steering;
   }
 
   avoidObstacles(obstacles: Obstacle[]): [number, number] {
-    const perceptionRadius = 20; // 将30减少到20
+    const perceptionRadius = 20;
     let steering: [number, number] = [0, 0];
     for (const obstacle of obstacles) {
-      // 修改为使用 [obstacle.x, obstacle.y]
       const d = this.distance([obstacle.x, obstacle.y]) - obstacle.radius;
       if (d < perceptionRadius) {
         let diff: [number, number] = [
@@ -159,7 +157,7 @@ export class Boid {
       steering = this.setMagnitude(steering, this.maxSpeed);
       steering[0] -= this.velocity[0];
       steering[1] -= this.velocity[1];
-      steering = this.limit(steering, this.maxForce * 2); // 强化避障力
+      steering = this.limit(steering, this.maxForce * 2);
     }
     return steering;
   }
@@ -191,7 +189,7 @@ export class Boid {
 
     this.acceleration[0] += accelX;
     this.acceleration[1] += accelY;
-    this.panicLevel = Math.max(0, this.panicLevel - 0.01); // Gradually reduce panic level
+    this.panicLevel = Math.max(0, this.panicLevel - 0.01);
   }
 
   update(obstacles: Obstacle[]) {
@@ -200,24 +198,21 @@ export class Boid {
     this.velocity[0] += this.acceleration[0];
     this.velocity[1] += this.acceleration[1];
     this.velocity = this.limit(this.velocity, this.maxSpeed);
-    // 保存当前加速度
     this.currentAcceleration = [...this.acceleration];
-    // 重置加速度
     this.acceleration[0] = 0;
     this.acceleration[1] = 0;
 
-    this.updateColor(); // Call the updateColor method
+    this.updateColor();
 
     if (this.isScattering) {
       this.scatterTime--;
       if (this.scatterTime <= 0) {
         this.isScattering = false;
         this.maxSpeed = this.normalMaxSpeed;
-        this.panicLevel = 0; // Reset panic level
+        this.panicLevel = 0;
       }
     }
 
-    // 检查是否进入障碍物内部
     obstacles.forEach((obstacle) => {
       const dx = this.position[0] - obstacle.x;
       const dy = this.position[1] - obstacle.y;
@@ -228,7 +223,6 @@ export class Boid {
           obstacle.x + (obstacle.radius + this.size) * Math.cos(angle);
         this.position[1] =
           obstacle.y + (obstacle.radius + this.size) * Math.sin(angle);
-        // 添加推力以帮助鲨鱼脱离障碍物
         this.velocity[0] += Math.cos(angle) * 0.5;
         this.velocity[1] += Math.sin(angle) * 0.5;
       }
@@ -248,7 +242,6 @@ export class Boid {
     }
   }
 
-  // 合并 distance 和 distanceToPoint 函数
   private distance(point: [number, number]): number {
     if (!point || point.length !== 2) {
       console.error('Invalid point provided to distance:', point);
@@ -269,17 +262,15 @@ export class Boid {
     return mag !== 0 ? [vector[0] / mag, vector[1] / mag] : [0, 0];
   }
 
-  // 优化 limit 函数
   private limit(vector: [number, number], max: number): [number, number] {
     const magSq = vector[0] ** 2 + vector[1] ** 2;
     if (magSq > max ** 2) {
       const mag = Math.sqrt(magSq);
-      return [(vector[0] / mag) * max, (vector[1] / mag) * max]; // 移除第二个元素的额外数组括号
+      return [(vector[0] / mag) * max, (vector[1] / mag) * max];
     }
     return vector;
   }
 
-  // 重构 updateColor 方法
   private updateColor() {
     const hue = 210 + (0 - 210) * this.panicLevel;
     this.color = `hsl(${hue}, 50%, 50%)`;
