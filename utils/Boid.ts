@@ -11,8 +11,8 @@ export class Boid {
   color: string;
   isScattering: boolean;
   scatterTime: number;
-  baseColor: string = 'hsl(210, 50%, 50%)';  // 柔和的蓝色
-  panicColor: string = 'hsl(0, 50%, 50%)';   // 柔和的红色
+  baseColor: string = 'hsl(210, 50%, 50%)'; // 柔和的蓝色
+  panicColor: string = 'hsl(0, 50%, 50%)'; // 柔和的红色
   panicLevel: number = 0; // Add panicLevel property
   size: number; // 添加 size 属性
   currentAcceleration: [number, number] = [0, 0]; // 添加 currentAcceleration 属性
@@ -88,7 +88,7 @@ export class Boid {
       if (other !== this && d < perceptionRadius) {
         let diff: [number, number] = [
           this.position[0] - other.position[0],
-          this.position[1] - other.position[1]
+          this.position[1] - other.position[1],
         ];
         diff = this.normalize(diff);
         diff[0] /= d;
@@ -116,7 +116,7 @@ export class Boid {
     if (d < perceptionRadius) {
       let diff: [number, number] = [
         this.position[0] - sharkPosition[0],
-        this.position[1] - sharkPosition[1]
+        this.position[1] - sharkPosition[1],
       ];
       diff = this.normalize(diff);
       diff[0] /= d;
@@ -127,7 +127,7 @@ export class Boid {
       steering[0] -= this.velocity[0];
       steering[1] -= this.velocity[1];
       steering = this.limit(steering, this.maxForce * 2); // Stronger avoidance force
-      
+
       // Trigger scattering behavior
       this.isScattering = true;
       this.scatterTime = 100; // Scatter for 100 frames
@@ -146,7 +146,7 @@ export class Boid {
       if (d < perceptionRadius) {
         let diff: [number, number] = [
           this.position[0] - obstacle.x,
-          this.position[1] - obstacle.y
+          this.position[1] - obstacle.y,
         ];
         diff = this.normalize(diff);
         diff[0] /= d;
@@ -176,16 +176,18 @@ export class Boid {
     const separationWeight = this.isScattering ? 2 : 1.5;
     const avoidanceWeight = this.isScattering ? 3 : 2;
 
-    const accelX = alignment[0] * alignmentWeight + 
-                   cohesion[0] * cohesionWeight + 
-                   separation[0] * separationWeight + 
-                   avoidance[0] * avoidanceWeight + 
-                   obstacleAvoidance[0] * 2;
-    const accelY = alignment[1] * alignmentWeight + 
-                   cohesion[1] * cohesionWeight + 
-                   separation[1] * separationWeight + 
-                   avoidance[1] * avoidanceWeight + 
-                   obstacleAvoidance[1] * 2;
+    const accelX =
+      alignment[0] * alignmentWeight +
+      cohesion[0] * cohesionWeight +
+      separation[0] * separationWeight +
+      avoidance[0] * avoidanceWeight +
+      obstacleAvoidance[0] * 2;
+    const accelY =
+      alignment[1] * alignmentWeight +
+      cohesion[1] * cohesionWeight +
+      separation[1] * separationWeight +
+      avoidance[1] * avoidanceWeight +
+      obstacleAvoidance[1] * 2;
 
     this.acceleration[0] += accelX;
     this.acceleration[1] += accelY;
@@ -216,14 +218,16 @@ export class Boid {
     }
 
     // 检查是否进入障碍物内部
-    obstacles.forEach(obstacle => {
+    obstacles.forEach((obstacle) => {
       const dx = this.position[0] - obstacle.x;
       const dy = this.position[1] - obstacle.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       if (distance < obstacle.radius + this.size) {
         const angle = Math.atan2(dy, dx);
-        this.position[0] = obstacle.x + (obstacle.radius + this.size) * Math.cos(angle);
-        this.position[1] = obstacle.y + (obstacle.radius + this.size) * Math.sin(angle);
+        this.position[0] =
+          obstacle.x + (obstacle.radius + this.size) * Math.cos(angle);
+        this.position[1] =
+          obstacle.y + (obstacle.radius + this.size) * Math.sin(angle);
         // 添加推力以帮助鲨鱼脱离障碍物
         this.velocity[0] += Math.cos(angle) * 0.5;
         this.velocity[1] += Math.sin(angle) * 0.5;
@@ -253,8 +257,11 @@ export class Boid {
     return Math.hypot(this.position[0] - point[0], this.position[1] - point[1]);
   }
 
-  private setMagnitude(vector: [number, number], mag: number): [number, number] {
-    return this.normalize(vector).map(v => v * mag) as [number, number];
+  private setMagnitude(
+    vector: [number, number],
+    mag: number,
+  ): [number, number] {
+    return this.normalize(vector).map((v) => v * mag) as [number, number];
   }
 
   private normalize(vector: [number, number]): [number, number] {
@@ -267,7 +274,7 @@ export class Boid {
     const magSq = vector[0] ** 2 + vector[1] ** 2;
     if (magSq > max ** 2) {
       const mag = Math.sqrt(magSq);
-      return [vector[0] / mag * max, vector[1] / mag * max]; // 移除第二个元素的额外数组括号
+      return [(vector[0] / mag) * max, (vector[1] / mag) * max]; // 移除第二个元素的额外数组括号
     }
     return vector;
   }
@@ -278,4 +285,3 @@ export class Boid {
     this.color = `hsl(${hue}, 50%, 50%)`;
   }
 }
-
