@@ -1,21 +1,38 @@
+// 导入 Obstacle 类
 import { Obstacle } from './Obstacle';
 
+// 定义 Boid 类，表示鱼群中的个体
 export class Boid {
+  // 位置
   position: [number, number];
+  // 速度
   velocity: [number, number];
+  // 加速度
   acceleration: [number, number];
+  // 最大受力
   maxForce: number;
+  // 最大速度
   maxSpeed: number;
+  // 正常最大速度
   normalMaxSpeed: number;
+  // 逃离时最大速度
   fleeMaxSpeed: number;
+  // 颜色
   color: string;
+  // 是否正在散开
   isScattering: boolean;
+  // 散开时间
   scatterTime: number;
+  // 基础颜色
   baseColor: string = 'hsl(210, 50%, 50%)';
+  // 惊慌程度
   panicLevel: number = 0;
+  // 大小
   size: number;
+  // 当前加速度
   currentAcceleration: [number, number] = [0, 0];
 
+  // 构造函数，初始化 Boid 实例
   constructor(x: number, y: number) {
     this.position = [x, y];
     this.velocity = [Math.random() * 2 - 1, Math.random() * 2 - 1];
@@ -30,6 +47,7 @@ export class Boid {
     this.size = 5;
   }
 
+  // 对齐行为，使 Boid 的速度与周围个体对齐
   align(boids: Boid[]): [number, number] {
     const perceptionRadius = 50;
     let steering: [number, number] = [0, 0];
@@ -53,6 +71,7 @@ export class Boid {
     return steering;
   }
 
+  // 凝聚行为，使 Boid 移向周围个体的中心位置
   cohere(boids: Boid[]): [number, number] {
     const perceptionRadius = 100;
     let steering: [number, number] = [0, 0];
@@ -78,6 +97,7 @@ export class Boid {
     return steering;
   }
 
+  // 分离行为，避免 Boid 与周围个体过于靠近
   separate(boids: Boid[]): [number, number] {
     const perceptionRadius = 30;
     let steering: [number, number] = [0, 0];
@@ -108,6 +128,7 @@ export class Boid {
     return steering;
   }
 
+  // 避免鲨鱼，远离鲨鱼的位置
   avoidShark(sharkPosition: [number, number]): [number, number] {
     const perceptionRadius = 150;
     let steering: [number, number] = [0, 0];
@@ -135,6 +156,7 @@ export class Boid {
     return steering;
   }
 
+  // 避开障碍物
   avoidObstacles(obstacles: Obstacle[]): [number, number] {
     const perceptionRadius = 20;
     let steering: [number, number] = [0, 0];
@@ -161,6 +183,7 @@ export class Boid {
     return steering;
   }
 
+  // 群集行为，综合对齐、凝聚和分离的结果
   flock(boids: Boid[], sharkPosition: [number, number], obstacles: Obstacle[]) {
     const alignment = this.align(boids);
     const cohesion = this.cohere(boids);
@@ -191,6 +214,7 @@ export class Boid {
     this.panicLevel = Math.max(0, this.panicLevel - 0.01);
   }
 
+  // 更新位置和速度
   update(obstacles: Obstacle[]) {
     this.position[0] += this.velocity[0];
     this.position[1] += this.velocity[1];
@@ -228,6 +252,7 @@ export class Boid {
     });
   }
 
+  // 处理边界情况，使 Boid 可以从另一侧进入
   edges(width: number, height: number) {
     if (this.position[0] > width) {
       this.position[0] = 0;
@@ -241,6 +266,7 @@ export class Boid {
     }
   }
 
+  // 计算与指定点的距离
   private distance(point: [number, number]): number {
     if (!point || point.length !== 2) {
       console.error('Invalid point provided to distance:', point);
@@ -249,6 +275,7 @@ export class Boid {
     return Math.hypot(this.position[0] - point[0], this.position[1] - point[1]);
   }
 
+  // 设置向量的大小
   private setMagnitude(
     vector: [number, number],
     mag: number,
@@ -256,11 +283,13 @@ export class Boid {
     return this.normalize(vector).map((v) => v * mag) as [number, number];
   }
 
+  // 归一化向量
   private normalize(vector: [number, number]): [number, number] {
     const mag = Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1]);
     return mag !== 0 ? [vector[0] / mag, vector[1] / mag] : [0, 0];
   }
 
+  // 限制向量的大小
   private limit(vector: [number, number], max: number): [number, number] {
     const magSq = vector[0] ** 2 + vector[1] ** 2;
     if (magSq > max ** 2) {
@@ -270,6 +299,7 @@ export class Boid {
     return vector;
   }
 
+  // 更新颜色，根据惊慌程度调整色调
   private updateColor() {
     const hue = 210 + (0 - 210) * this.panicLevel;
     this.color = `hsl(${hue}, 50%, 50%)`;
