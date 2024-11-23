@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Boid } from '../utils/Boid';
-import { Obstacle } from '../utils/Obstacle';
+import { Boid } from '@/utils/Boid';
+import { Obstacle } from '@/utils/Obstacle';
 import { StatsDisplay } from './StatsDisplay';
 
 interface BoidSimulationProps {

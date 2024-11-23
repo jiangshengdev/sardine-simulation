@@ -12,7 +12,6 @@ export class Boid {
   isScattering: boolean;
   scatterTime: number;
   baseColor: string = 'hsl(210, 50%, 50%)';
-  panicColor: string = 'hsl(0, 50%, 50%)';
   panicLevel: number = 0;
   size: number;
   currentAcceleration: [number, number] = [0, 0];
