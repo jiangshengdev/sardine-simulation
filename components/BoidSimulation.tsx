@@ -41,6 +41,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
+      // 设置画布的大小和缩放，以支持高分辨率屏幕
       const scale = window.devicePixelRatio || 1;
       canvas.width = width * scale;
       canvas.height = height * scale;
@@ -50,11 +51,13 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
       }
     }
 
+    // 初始化 Boid 实例数组，在随机位置生成
     boidsRef.current = Array.from(
       { length: boidCount },
       () => new Boid(Math.random() * width, Math.random() * height),
     );
 
+    // 初始化障碍物
     obstaclesRef.current = [
       new Obstacle(width * 0.25, height * 0.25, 30),
       new Obstacle(width * 0.75, height * 0.75, 40),
@@ -91,14 +94,16 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
     });
   }, []);
 
-  // 动画循环函数
+  // 动画循环函数，更新和绘制 Boid 和障碍物
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
 
     if (ctx) {
+      // 清除画布
       ctx.clearRect(0, 0, width, height);
 
+      // 计算 Boid 的行为
       boidsRef.current.forEach((boid) => {
         boid.flock(
           boidsRef.current,
@@ -107,10 +112,12 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
         );
       });
 
+      // 更新 Boid 的位置并绘制
       boidsRef.current.forEach((boid) => {
         boid.update(obstaclesRef.current);
         boid.edges(width, height);
 
+        // 绘制 Boid
         ctx.fillStyle = boid.color;
         ctx.beginPath();
         const angle = Math.atan2(boid.velocity[1], boid.velocity[0]);
@@ -130,6 +137,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
         ctx.fill();
       });
 
+      // 绘制障碍物
       obstaclesRef.current.forEach((obstacle) => {
         ctx.fillStyle = 'hsl(120, 30%, 50%)';
         ctx.beginPath();
@@ -137,6 +145,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
         ctx.fill();
       });
 
+      // 绘制鼠标位置（红色圆点）
       ctx.fillStyle = 'hsl(0, 70%, 60%)';
       ctx.beginPath();
       ctx.arc(
@@ -149,12 +158,15 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
       ctx.fill();
     }
 
+    // 请求下一帧动画
     animationFrameIdRef.current = requestAnimationFrame(animate);
   }, [width, height]);
 
   useEffect(() => {
+    // 启动动画
     animate();
     return () => {
+      // 组件卸载时取消动画帧
       if (animationFrameIdRef.current) {
         cancelAnimationFrame(animationFrameIdRef.current);
       }
@@ -162,11 +174,12 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
   }, [animate]);
 
   useEffect(() => {
+    // 定时计算统计数据
     const intervalId = setInterval(calculateStats, 160);
     return () => clearInterval(intervalId);
   }, [calculateStats]);
 
-  // 处理鼠标移动的事件
+  // 处理鼠标移动的事件，更新鼠标位置
   const handleMouseMove = useCallback(
     (event: React.MouseEvent<HTMLCanvasElement>) => {
       const canvas = canvasRef.current;
@@ -189,6 +202,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
         height={height}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => {
+          // 鼠标离开时，将鼠标位置重置到画布外
           mousePositionRef.current = [-300, -300];
         }}
         className="border border-gray-300 cursor-none"
