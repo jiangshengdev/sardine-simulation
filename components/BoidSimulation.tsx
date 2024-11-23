@@ -1,3 +1,4 @@
+// 使用 'use client' 指令，使组件在客户端渲染
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -5,23 +6,31 @@ import { Boid } from '@/utils/Boid';
 import { Obstacle } from '@/utils/Obstacle';
 import { StatsDisplay } from './StatsDisplay';
 
+// BoidSimulation 组件的属性接口
 interface BoidSimulationProps {
-  width: number;
-  height: number;
-  boidCount: number;
+  width: number;      // 画布宽度
+  height: number;     // 画布高度
+  boidCount: number;  // Boid 的数量
 }
 
+// BoidSimulation 组件
 const BoidSimulation: React.FC<BoidSimulationProps> = ({
   width,
   height,
   boidCount,
 }) => {
+  // 画布的引用
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Boid 实例数组的引用
   const boidsRef = useRef<Boid[]>([]);
+  // 障碍物数组的引用
   const obstaclesRef = useRef<Obstacle[]>([]);
+  // 鼠标位置的引用，初始化在画布外
   const mousePositionRef = useRef<[number, number]>([-300, -300]);
+  // 动画帧 ID 的引用
   const animationFrameIdRef = useRef<number>();
 
+  // 状态，用于存储统计数据
   const [stats, setStats] = useState({
     boidCount: boidCount,
     averageSpeed: 0,
@@ -53,6 +62,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
     ];
   }, [width, height, boidCount]);
 
+  // 计算统计数据的函数
   const calculateStats = useCallback(() => {
     const boids = boidsRef.current;
     let totalSpeed = 0;
@@ -81,6 +91,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
     });
   }, []);
 
+  // 动画循环函数
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -155,6 +166,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
     return () => clearInterval(intervalId);
   }, [calculateStats]);
 
+  // 处理鼠标移动的事件
   const handleMouseMove = useCallback(
     (event: React.MouseEvent<HTMLCanvasElement>) => {
       const canvas = canvasRef.current;
@@ -170,6 +182,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
 
   return (
     <div className="flex flex-col items-center space-y-4">
+      {/* 绘制 Boid 的画布 */}
       <canvas
         ref={canvasRef}
         width={width}
@@ -180,6 +193,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
         }}
         className="border border-gray-300 cursor-none"
       />
+      {/* 显示统计数据的组件 */}
       <StatsDisplay
         boidCount={stats.boidCount}
         averageSpeed={stats.averageSpeed}
