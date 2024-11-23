@@ -54,7 +54,11 @@ export class Boid {
     this.size = 5;
   }
 
-  // 对齐行为，使 Boid 的速度与周围个体的平均速度对齐
+  /**
+   * 对齐行为，使 Boid 的速度与周围个体的平均速度对齐。
+   * @param boids 周围的 Boid 实例数组
+   * @returns 调整后的加速度矢量 [ax, ay]
+   */
   align(boids: Boid[]): [number, number] {
     // 感知范围半径，Boid 只能感知到该范围内的其他个体
     const perceptionRadius = 50;
@@ -87,7 +91,11 @@ export class Boid {
     return steering;
   }
 
-  // 凝聚行为，使 Boid 移向周围个体的中心位置
+  /**
+   * 凝聚行为，使 Boid 移向周围个体的中心位置。
+   * @param boids 周围的 Boid 实例数组
+   * @returns 调整后的加速度矢量 [ax, ay]
+   */
   cohere(boids: Boid[]): [number, number] {
     // 感知范围半径，影响凝聚程度
     const perceptionRadius = 100;
@@ -120,7 +128,11 @@ export class Boid {
     return steering;
   }
 
-  // 分离行为，避免 Boid 与周围个体过于靠近
+  /**
+   * 分离行为，避免 Boid 与周围个体过于靠近。
+   * @param boids 周围的 Boid 实例数组
+   * @returns 调整后的加速度矢量 [ax, ay]
+   */
   separate(boids: Boid[]): [number, number] {
     // 感知范围半径，影响分离的强度
     const perceptionRadius = 30;
@@ -158,7 +170,11 @@ export class Boid {
     return steering;
   }
 
-  // 避免鲨鱼，远离鲨鱼的位置
+  /**
+   * 避免鲨鱼，远离鲨鱼的位置。
+   * @param sharkPosition 鲨鱼的位置坐标 [x, y]
+   * @returns 调整后的加速度矢量 [ax, ay]
+   */
   avoidShark(sharkPosition: [number, number]): [number, number] {
     // 感知鲨鱼的范围半径，影响避让行为
     const perceptionRadius = 150;
@@ -193,7 +209,11 @@ export class Boid {
     return steering;
   }
 
-  // 避开障碍物
+  /**
+   * 避开障碍物。
+   * @param obstacles 障碍物的数组
+   * @returns 调整后的加速度矢量 [ax, ay]
+   */
   avoidObstacles(obstacles: Obstacle[]): [number, number] {
     // 感知障碍物的范围半径
     const perceptionRadius = 20;
@@ -227,7 +247,12 @@ export class Boid {
     return steering;
   }
 
-  // 群集行为，综合对齐、凝聚和分离的结果
+  /**
+   * 群集行为，综合对齐、凝聚和分离的结果。
+   * @param boids 周围的 Boid 实例数组
+   * @param sharkPosition 鲨鱼的位置坐标 [x, y]
+   * @param obstacles 障碍物的数组
+   */
   flock(boids: Boid[], sharkPosition: [number, number], obstacles: Obstacle[]) {
     // 计算各个行为的转向力
     const alignment = this.align(boids);
@@ -263,7 +288,10 @@ export class Boid {
     this.panicLevel = Math.max(0, this.panicLevel - 0.01);
   }
 
-  // 更新位置和速度
+  /**
+   * 更新 Boid 的位置和速度。
+   * @param obstacles 障碍物的数组
+   */
   update(obstacles: Obstacle[]) {
     // 更新位置，根据当前速度移动
     this.position[0] += this.velocity[0];
@@ -313,7 +341,11 @@ export class Boid {
     });
   }
 
-  // 处理边界情况，使 Boid 可以从屏幕另一侧进入，实现循环空间
+  /**
+   * 处理屏幕边界，使 Boid 可以从一侧进入另一侧。
+   * @param width 屏幕的宽度
+   * @param height 屏幕的高度
+   */
   edges(width: number, height: number) {
     // 水平边界处理
     if (this.position[0] > width) {
@@ -329,7 +361,11 @@ export class Boid {
     }
   }
 
-  // 计算与指定点的距离
+  /**
+   * 计算与指定点的距离。
+   * @param point 指定的点坐标 [x, y]
+   * @returns 与指定点的距离
+   */
   private distance(point: [number, number]): number {
     if (!point || point.length !== 2) {
       console.error('Invalid point provided to distance:', point);
@@ -339,7 +375,12 @@ export class Boid {
     return Math.hypot(this.position[0] - point[0], this.position[1] - point[1]);
   }
 
-  // 设置向量的大小，将向量调整为指定的模长
+  /**
+   * 设置向量的大小，将向量调整为指定的模长。
+   * @param vector 要调整的向量 [x, y]
+   * @param mag 指定的模长
+   * @returns 调整后的向量 [x, y]
+   */
   private setMagnitude(
     vector: [number, number],
     mag: number,
@@ -348,14 +389,23 @@ export class Boid {
     return this.normalize(vector).map((v) => v * mag) as [number, number];
   }
 
-  // 归一化向量，将向量调整为单位长度
+  /**
+   * 归一化向量，将向量调整为单位长度。
+   * @param vector 要归一化的向量 [x, y]
+   * @returns 归一化后的向量 [x, y]
+   */
   private normalize(vector: [number, number]): [number, number] {
     const mag = Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1]);
     // 防止除以零
     return mag !== 0 ? [vector[0] / mag, vector[1] / mag] : [0, 0];
   }
 
-  // 限制向量的大小，如果向量的模长超过最大值，则缩放到最大值
+  /**
+   * 限制向量的大小，如果向量的模长超过最大值，则将其缩放到最大值。
+   * @param vector 要限制的向量 [x, y]
+   * @param max 最大模长
+   * @returns 限制后的向量 [x, y]
+   */
   private limit(vector: [number, number], max: number): [number, number] {
     const magSq = vector[0] ** 2 + vector[1] ** 2;
     if (magSq > max ** 2) {
@@ -365,7 +415,9 @@ export class Boid {
     return vector;
   }
 
-  // 更新颜色，根据惊慌程度调整色调
+  /**
+   * 更新 Boid 的颜色，根据惊慌程度调整色调。
+   */
   private updateColor() {
     // 根据 panicLevel 线性插值计算色相，惊慌程度越高，颜色越偏红
     const hue = 210 + (0 - 210) * this.panicLevel;

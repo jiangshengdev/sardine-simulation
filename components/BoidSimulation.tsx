@@ -8,9 +8,9 @@ import { StatsDisplay } from './StatsDisplay';
 
 // BoidSimulation 组件的属性接口
 interface BoidSimulationProps {
-  width: number;      // 画布宽度
-  height: number;     // 画布高度
-  boidCount: number;  // Boid 的数量
+  width: number; // 画布宽度
+  height: number; // 画布高度
+  boidCount: number; // Boid 的数量
 }
 
 // BoidSimulation 组件
