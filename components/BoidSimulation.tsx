@@ -28,7 +28,7 @@ const BoidSimulation: React.FC<BoidSimulationProps> = ({
   // 鼠标位置的引用，初始化在画布外
   const mousePositionRef = useRef<[number, number]>([-300, -300]);
   // 动画帧 ID 的引用
-  const animationFrameIdRef = useRef<number>();
+  const animationFrameIdRef = useRef<number | undefined>(undefined);
 
   // 状态，用于存储统计数据
   const [stats, setStats] = useState({
